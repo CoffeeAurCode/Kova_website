@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kova.app",
+      "sha256_cert_fingerprints": [
+        "3D:8C:01:BB:25:4F:B4:83:98:8B:01:4E:B9:96:C2:1E:C8:5E:1E:5E:47:A3:30:B8:AC:C5:09:9A:9B:27:54:CA"
+      ]
+    }
+  }
+]

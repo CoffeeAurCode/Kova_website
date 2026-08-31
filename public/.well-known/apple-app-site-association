@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["DSHZ8LU3QK.com.entrava.kova"],
+        "components": [
+          {
+            "/": "/event/*",
+            "comment": "Event pages open directly in the Entrava app"
+          }
+        ]
+      }
+    ]
+  }
+}
