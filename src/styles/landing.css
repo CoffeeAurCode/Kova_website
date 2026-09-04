@@ -513,42 +513,59 @@
 
 .lp-cam {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 108px;
-  height: 108px;
-  border-radius: 34px;
-  background: linear-gradient(150deg, #35353b, #17171a 60%, #232328);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
-  padding: 9px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  top: 18px;
+  left: 18px;
+  width: 112px;
+  height: 112px;
+  border-radius: 27px;
+  background:
+    radial-gradient(80% 65% at 24% 16%, rgba(255, 255, 255, 0.09), transparent 58%),
+    linear-gradient(145deg, #34343a 0%, #1b1b1f 52%, #25252a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.44),
+    inset 0 1px 1px rgba(255, 255, 255, 0.075);
+  transform: translateZ(2.2px);
+  transform-style: preserve-3d;
 }
 .lp-lens {
+  position: absolute;
+  width: 43px;
+  height: 43px;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #4d5a68 0%, #10141a 46%, #05070a 100%);
-  box-shadow: inset 0 0 0 2.5px #2b2b31, 0 0 6px rgba(0, 0, 0, 0.8);
-  position: relative;
+  background:
+    radial-gradient(circle at 36% 31%, rgba(155, 183, 207, 0.8) 0 5%, transparent 15%),
+    radial-gradient(circle at 48% 47%, #18232e 0 29%, #070a0f 52%, #020305 72%);
+  border: 3px solid #303036;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(143, 143, 151, 0.46),
+    inset 0 0 9px rgba(65, 103, 139, 0.28);
+  transform: translateZ(2px);
 }
 .lp-lens::after {
   content: '';
   position: absolute;
-  inset: 30%;
+  inset: 24%;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, rgba(150, 200, 255, 0.5), transparent 62%);
+  background: radial-gradient(circle at 40% 35%, rgba(150, 200, 255, 0.32), transparent 62%);
 }
-.lp-lens:nth-child(3) {
-  grid-column: 1;
-}
+.lp-lens:nth-child(1) { top: 8px; left: 9px; }
+.lp-lens:nth-child(2) { top: 8px; right: 9px; }
+.lp-lens:nth-child(3) { bottom: 8px; left: 9px; }
 .lp-flash {
-  grid-column: 2;
-  align-self: end;
-  justify-self: center;
-  width: 22px;
-  height: 22px;
+  position: absolute;
+  right: 18px;
+  bottom: 20px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #f7edd0, #8b7f5e 60%, #2a2620);
+  background: radial-gradient(circle at 40% 35%, #fff8dc 0 18%, #c5b98d 48%, #625b47 74%, #27241e 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  transform: translateZ(1px);
 }
 
 .lp-back-mark {
@@ -735,9 +752,19 @@
 
 /* the finale word is the backdrop of the whole scene, so it carries further */
 .lp-sec-finale .lp-ghost {
-  background: linear-gradient(180deg, rgba(238, 229, 210, 0.16), rgba(201, 179, 138, 0.045));
-  -webkit-background-clip: text;
-  background-clip: text;
+  top: 49%;
+  width: 100vw;
+  font-family: 'Barlow', Impact, sans-serif;
+  font-size: clamp(110px, 15.8vw, 280px);
+  font-weight: 600;
+  line-height: 0.76;
+  letter-spacing: -0.055em;
+  color: #e9e8e3;
+  -webkit-text-fill-color: #e9e8e3;
+  background: none;
+  opacity: calc(var(--final-word-in, 0) * 0.94);
+  text-shadow: 0 0 44px rgba(255, 255, 255, 0.045);
+  will-change: transform, opacity;
 }
 
 /* ---- scroll cue --------------------------------------------------------- */
@@ -776,15 +803,43 @@
 
 .lp-sec-finale .lp-sec-inner {
   display: block;
+  transform: translateY(var(--final-stage-lift, 0px));
+  will-change: transform;
 }
+
+.lp-finale-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 34px;
+  height: 34px;
+  margin-top: -17px;
+  display: grid;
+  place-items: center;
+  color: rgba(233, 232, 227, 0.62);
+  transform: translateY(var(--final-stage-lift, 0px));
+  opacity: var(--final-word-in, 0);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.lp-finale-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+.lp-finale-arrow--left { left: clamp(12px, 2vw, 34px); }
+.lp-finale-arrow--right { right: clamp(12px, 2vw, 34px); }
 
 .lp-gates {
   position: relative;
   z-index: 4;
+  width: min(900px, 62vw);
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr minmax(300px, 0.62fr) 1fr;
-  align-items: stretch;
+  grid-template-columns: 1fr clamp(140px, 16vw, 240px) 1fr;
+  align-items: center;
   gap: 0;
+  opacity: var(--final-cards-in, 0);
+  will-change: opacity;
 }
 
 .lp-gate {
@@ -792,20 +847,28 @@
   background: linear-gradient(150deg, rgba(20, 19, 17, 0.86), rgba(9, 9, 8, 0.78));
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  padding: clamp(28px, 2.6vw, 44px);
+  min-height: clamp(140px, 14.7vw, 210px);
+  padding: clamp(18px, 1.65vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  transition: border-color 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.55s ease;
+  gap: 10px;
+  transition: border-color 0.55s ease, background-color 0.55s ease;
 }
 .lp-gate:first-child {
   border-radius: 22px 0 0 22px;
   border-right: 0;
+  transform: translateX(var(--final-card-inset, 78px));
 }
 .lp-gate:last-child {
   border-radius: 0 22px 22px 0;
   border-left: 0;
+  transform: translateX(var(--final-card-inset-neg, -78px));
+}
+.lp-sec-finale .lp-gate {
+  will-change: transform, opacity;
+}
+.lp-sec-finale .lp-gate:hover {
+  border-color: rgba(201, 179, 138, 0.42);
 }
 .lp-gate:hover {
   border-color: rgba(201, 179, 138, 0.42);
@@ -819,9 +882,9 @@
 }
 .lp-gate-icon {
   flex: none;
-  width: 54px;
-  height: 54px;
-  border-radius: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
   display: grid;
   place-items: center;
   color: var(--gold);
@@ -829,7 +892,7 @@
   background: rgba(201, 179, 138, 0.055);
 }
 .lp-gate-tag {
-  font-size: 10.5px;
+  font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -840,13 +903,13 @@
   font-family: var(--serif);
   font-weight: 500;
   text-transform: uppercase;
-  font-size: clamp(28px, 2.5vw, 40px);
+  font-size: clamp(20px, 1.6vw, 26px);
   line-height: 1;
   margin: 0;
   color: var(--gold-light);
 }
 .lp-gate-body {
-  font-size: 14.5px;
+  font-size: 11.5px;
   color: var(--text-2);
   margin: 0;
   line-height: 1.7;
@@ -854,7 +917,7 @@
 
 .lp-gate-link {
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 8px;
   display: inline-flex;
   align-items: center;
   gap: 16px;
@@ -862,7 +925,7 @@
   border: 0;
   color: var(--text);
   font-family: var(--sans);
-  font-size: 11.5px;
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.19em;
   text-transform: uppercase;
@@ -872,8 +935,8 @@
   transition: color 0.35s ease;
 }
 .lp-gate-link i {
-  width: 38px;
-  height: 38px;
+  width: 31px;
+  height: 31px;
   border-radius: 50%;
   border: 1px solid rgba(201, 179, 138, 0.34);
   display: grid;
@@ -897,6 +960,39 @@
 /* the phone's lane between the two cards */
 .lp-gate-gap {
   min-height: 1px;
+}
+
+/* Only the top edge of the next card row is visible in frame 100. */
+.lp-finale-teasers {
+  position: absolute;
+  left: 50%;
+  bottom: -112px;
+  z-index: 3;
+  width: min(760px, 86vw);
+  height: 150px;
+  transform: translate(-50%, var(--final-teaser-offset, 36px));
+  opacity: var(--final-cards-in, 0);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.lp-finale-teasers i {
+  display: block;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid rgba(201, 179, 138, 0.22);
+  background:
+    radial-gradient(70% 90% at 28% 30%, rgba(176, 128, 82, 0.3), transparent 58%),
+    linear-gradient(145deg, #25221d, #0f0f0e);
+}
+.lp-finale-teasers i:nth-child(2) {
+  background: linear-gradient(145deg, #cbb58e, #887552);
+}
+.lp-finale-teasers i:nth-child(3) {
+  background:
+    radial-gradient(70% 90% at 72% 30%, rgba(201, 179, 138, 0.26), transparent 58%),
+    linear-gradient(145deg, #201f1c, #0d0d0c);
 }
 
 /* ============================================================================
@@ -1048,9 +1144,10 @@
      and let it wrap — "USE ENTRAVA" on one line at 24vw shows four letters */
   .lp-sec-finale .lp-ghost {
     top: 50svh;
-    font-size: 19vw;
-    line-height: 0.84;
-    white-space: normal;
+    width: 100vw;
+    font-size: 15.8vw;
+    line-height: 0.8;
+    white-space: nowrap;
   }
 
   .lp-cue {
@@ -1059,6 +1156,7 @@
 
   /* the QR screen gets a viewport of its own, then the cards rise into it */
   .lp-gates {
+    width: 88vw;
     grid-template-columns: 1fr;
     margin-top: 100svh;
     gap: 14px;
@@ -1067,6 +1165,11 @@
   .lp-gate:last-child {
     border-radius: 20px;
     border: 1px solid var(--line);
+    transform: none;
+  }
+
+  .lp-finale-teasers {
+    display: none;
   }
 
   .lp-footer-inner {
