@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Phone from '../components/landing/Phone'
-import { ArrowRight, CalendarIcon, Close, Menu, UserIcon } from '../components/landing/icons'
+import { ArrowRight, CalendarIcon, ChevronLeft, Close, Menu, UserIcon } from '../components/landing/icons'
 import '../styles/landing.css'
 
 const APP_STORE_URL = 'https://apps.apple.com/in/app/entrava-nightlife/id6789246261'
@@ -64,6 +64,10 @@ const easeInOut = (t: number) =>
    through the flip. The slightly early roll peak gives the handset momentum. */
 const bump = (t: number) => Math.sin(Math.PI * t)
 const bumpEarly = (t: number) => Math.sin(Math.PI * Math.pow(t, 0.78))
+const smoothstep = (start: number, end: number, value: number) => {
+  const t = clamp((value - start) / (end - start), 0, 1)
+  return t * t * (3 - 2 * t)
+}
 
 const topOf = (el: HTMLElement) => el.getBoundingClientRect().top + window.scrollY
 
@@ -189,7 +193,8 @@ export default function Landing() {
     (p: number) => {
       const { pose, scr } = sample(p)
       const { vw, vh, fit, mobile } = view.current
-      const { ps } = track.current
+      const { ps, range } = track.current
+      const finaleLift = ps.length >= 4 ? Math.min(0, (p - ps[3]) * range) : 0
 
       if (sceneRef.current) {
         sceneRef.current.style.transform =
@@ -222,7 +227,24 @@ export default function Landing() {
         const g = ghostRefs.current[i]
         if (!g) continue
         const d = clamp((p - ps[i]) * 3.2, -1.4, 1.4)
-        g.style.transform = `translate(-50%, calc(-50% + ${(-d * 60).toFixed(2)}px))`
+        const lift = i === 3 ? finaleLift : 0
+        g.style.transform =
+          `translate(-50%, calc(-50% + ${(-d * 60 + lift).toFixed(2)}px))`
+      }
+
+      /* The final 25 frames have their own choreography: the title arrives
+         after the edge-on phone, then the two cards open out from behind it. */
+      if (rootRef.current && ps.length >= 4) {
+        const span = Math.max(1e-6, ps[3] - ps[2])
+        const finale = clamp((p - ps[2]) / span, 0, 1)
+        const wordIn = smoothstep(0.58, 0.72, finale)
+        const cardsIn = smoothstep(0.84, 0.985, finale)
+        rootRef.current.style.setProperty('--final-word-in', String(wordIn))
+        rootRef.current.style.setProperty('--final-cards-in', String(cardsIn))
+        rootRef.current.style.setProperty('--final-stage-lift', `${finaleLift.toFixed(2)}px`)
+        rootRef.current.style.setProperty('--final-card-inset', `${((1 - cardsIn) * 78).toFixed(2)}px`)
+        rootRef.current.style.setProperty('--final-card-inset-neg', `${((cardsIn - 1) * 78).toFixed(2)}px`)
+        rootRef.current.style.setProperty('--final-teaser-offset', `${((1 - cardsIn) * 36).toFixed(2)}px`)
       }
 
       if (scr !== screenRef.current) {
@@ -496,6 +518,13 @@ export default function Landing() {
             sectionRefs.current[1] = el
           }}
         >
+          <span className="lp-finale-arrow lp-finale-arrow--left" aria-hidden="true">
+            <ChevronLeft />
+          </span>
+          <span className="lp-finale-arrow lp-finale-arrow--right" aria-hidden="true">
+            <ArrowRight />
+          </span>
+
           <span
             className="lp-ghost"
             aria-hidden="true"
@@ -591,8 +620,8 @@ export default function Landing() {
           </span>
 
           <div className="lp-sec-inner">
-            <div className="lp-gates" data-rv>
-              <article className="lp-gate lp-rv lp-rv-1">
+            <div className="lp-gates">
+              <article className="lp-gate">
                 <div className="lp-gate-head">
                   <span className="lp-gate-icon"><CalendarIcon /></span>
                   <div>
@@ -609,7 +638,7 @@ export default function Landing() {
 
               <div className="lp-gate-gap" />
 
-              <article className="lp-gate lp-rv lp-rv-2">
+              <article className="lp-gate">
                 <div className="lp-gate-head">
                   <span className="lp-gate-icon"><UserIcon /></span>
                   <div>
@@ -624,6 +653,10 @@ export default function Landing() {
                 </button>
               </article>
             </div>
+          </div>
+
+          <div className="lp-finale-teasers" aria-hidden="true">
+            <i /><i /><i />
           </div>
         </section>
       </div>

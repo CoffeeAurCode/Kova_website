@@ -461,6 +461,16 @@
   padding: 0 30px 40px;
   position: relative;
 }
+
+/* The reference finale uses a satin titanium S-curve behind the QR. Keeping
+   it on the entry screen means it follows the phone through the final turn. */
+.lp-scr:last-child {
+  background:
+    radial-gradient(112% 62% at -8% 116%, rgba(229, 219, 199, 0.72) 0 17%, rgba(156, 148, 134, 0.34) 22%, transparent 36%),
+    radial-gradient(105% 61% at 108% -8%, rgba(205, 202, 194, 0.38) 0 19%, rgba(115, 114, 111, 0.18) 27%, transparent 42%),
+    radial-gradient(90% 62% at 42% 48%, rgba(255, 255, 255, 0.075), transparent 64%),
+    #070707;
+}
 .lp-entry-menu {
   position: absolute;
   top: 4px;
