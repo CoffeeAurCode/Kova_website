@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type CSSProperties } from 'react'
 import {
   ChevronLeft,
   Menu,
@@ -280,10 +280,30 @@ function ScreenEntry() {
 
 const SCREENS = [ScreenDiscover, ScreenPreBook, ScreenPay, ScreenEntry]
 
-/* ---- the box ------------------------------------------------------------- */
+/* ---- the handset --------------------------------------------------------- */
 export default function Phone({ screen }: { screen: number }) {
   return (
     <div className="lp-phone">
+      {/*
+        A stack of rounded silhouettes forms the titanium chassis. Rectangular
+        side faces used to poke past the rounded corners whenever the phone
+        tilted, which created the detached "rod" visible in the old build.
+        These slices preserve one continuous iPhone-shaped outline at every
+        viewing angle.
+      */}
+      <div className="lp-chassis" aria-hidden="true">
+        {Array.from({ length: 25 }, (_, i) => (
+          <i key={i} style={{ '--phone-z': `${i - 12}px` } as CSSProperties} />
+        ))}
+      </div>
+
+      <div className="lp-controls" aria-hidden="true">
+        <i className="lp-side-control lp-side-control--action" />
+        <i className="lp-side-control lp-side-control--up" />
+        <i className="lp-side-control lp-side-control--down" />
+        <i className="lp-side-control lp-side-control--power" />
+      </div>
+
       {/* front: frame + screen */}
       <div className="lp-face lp-face-front">
         <div className="lp-screen">
@@ -308,17 +328,6 @@ export default function Phone({ screen }: { screen: number }) {
         <span className="lp-back-foot">DESIGNED FOR THE NIGHT</span>
       </div>
 
-      {/* rails */}
-      <div className="lp-face lp-face-left">
-        <i className="lp-btn lp-btn-action" />
-        <i className="lp-btn lp-btn-vup" />
-        <i className="lp-btn lp-btn-vdn" />
-      </div>
-      <div className="lp-face lp-face-right">
-        <i className="lp-btn lp-btn-power" />
-      </div>
-      <div className="lp-face lp-face-top" />
-      <div className="lp-face lp-face-bottom" />
     </div>
   )
 }

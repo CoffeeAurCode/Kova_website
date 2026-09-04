@@ -33,7 +33,8 @@
   /* ---- phone geometry (base, before the animated scale) ----------------- */
   --pw: 300px;
   --ph: 618px;
-  --pd: 13px;
+  /* The reference handset has a visibly substantial titanium band. */
+  --pd: 24px;
 
   background: var(--bg);
   color: var(--text);
@@ -349,7 +350,7 @@
   transform-style: preserve-3d;
 }
 
-/* ---- the six faces of a real 3D box ------------------------------------ */
+/* ---- a continuously rounded 3D chassis --------------------------------- */
 .lp-face {
   position: absolute;
   backface-visibility: hidden;
@@ -359,124 +360,99 @@
 
 .lp-face-front,
 .lp-face-back {
-  left: 0;
-  top: 0;
-  width: var(--pw);
-  height: var(--ph);
-  border-radius: 52px;
+  inset: 2px;
+  width: calc(var(--pw) - 4px);
+  height: calc(var(--ph) - 4px);
+  border-radius: 50px;
 }
 .lp-face-front {
-  transform: translateZ(calc(var(--pd) / 2));
+  transform: translateZ(calc(var(--pd) / 2 + 0.6px));
 }
 .lp-face-back {
-  transform: rotateY(180deg) translateZ(calc(var(--pd) / 2));
+  transform: rotateY(180deg) translateZ(calc(var(--pd) / 2 + 0.6px));
 }
 
-.lp-face-left,
-.lp-face-right {
-  top: 0;
-  left: calc(50% - var(--pd) / 2);
-  width: var(--pd);
-  height: var(--ph);
-  border-radius: 4px;
-}
-.lp-face-left {
-  transform: rotateY(-90deg) translateZ(calc(var(--pw) / 2));
-}
-.lp-face-right {
-  transform: rotateY(90deg) translateZ(calc(var(--pw) / 2));
-}
-
-.lp-face-top,
-.lp-face-bottom {
-  left: 0;
-  top: calc(50% - var(--pd) / 2);
-  width: var(--pw);
-  height: var(--pd);
-  border-radius: 4px;
-}
-.lp-face-top {
-  transform: rotateX(90deg) translateZ(calc(var(--ph) / 2));
-}
-.lp-face-bottom {
-  transform: rotateX(-90deg) translateZ(calc(var(--ph) / 2));
-}
-
-/* ---- titanium rails ----------------------------------------------------- */
-.lp-face-left,
-.lp-face-right {
-  background: linear-gradient(
-    90deg,
-    #16161a 0%,
-    #55555c 14%,
-    #9a9aa2 34%,
-    #6d6d75 54%,
-    #34343a 78%,
-    #131317 100%
-  );
-}
-.lp-face-top,
-.lp-face-bottom {
-  background: linear-gradient(
-    180deg,
-    #16161a 0%,
-    #55555c 18%,
-    #92929a 42%,
-    #4b4b52 74%,
-    #131317 100%
-  );
-}
-
-/* physical buttons on the rails */
-.lp-btn {
+.lp-chassis,
+.lp-controls {
   position: absolute;
-  left: -1px;
-  right: -1px;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.lp-chassis > i {
+  position: absolute;
+  inset: 0;
+  border-radius: 52px;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.22), transparent 18% 72%, rgba(255, 255, 255, 0.12)),
+    linear-gradient(145deg, #85858c 0%, #29292e 18%, #696970 42%, #202025 68%, #77777e 86%, #17171b 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.48);
+  transform: translateZ(var(--phone-z));
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Slim controls sit on the silhouette instead of being full-height rails. */
+.lp-side-control {
+  position: absolute;
+  width: 3px;
   border-radius: 2px;
-  background: linear-gradient(90deg, #26262b, #85858d 40%, #4a4a51 70%, #1d1d21);
+  background: linear-gradient(90deg, #17171a, #a1a1a6 48%, #2d2d31);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.85);
+  transform: translateZ(8px);
 }
-.lp-btn-action {
-  top: 20%;
-  height: 30px;
-}
-.lp-btn-vup {
-  top: 27.5%;
-  height: 46px;
-}
-.lp-btn-vdn {
-  top: 36%;
-  height: 46px;
-}
-.lp-btn-power {
-  top: 29%;
-  height: 74px;
-}
+.lp-side-control--action { left: -1px; top: 112px; height: 25px; }
+.lp-side-control--up { left: -1px; top: 166px; height: 43px; }
+.lp-side-control--down { left: -1px; top: 222px; height: 43px; }
+.lp-side-control--power { right: -1px; top: 174px; height: 76px; }
 
 /* ---- front frame + screen ---------------------------------------------- */
 .lp-face-front {
-  padding: 3px;
+  padding: 5px;
   background: linear-gradient(
     148deg,
-    #7e7e87 0%,
-    #303036 22%,
-    #5d5d66 44%,
-    #232328 66%,
-    #6f6f78 84%,
-    #1c1c20 100%
+    #9b9ba1 0%,
+    #303035 19%,
+    #74747b 42%,
+    #202025 66%,
+    #828288 84%,
+    #17171b 100%
   );
   box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.9),
-    0 60px 120px -30px rgba(0, 0, 0, 0.95);
+    0 0 0 1px rgba(0, 0, 0, 0.92),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 52px 100px -34px rgba(0, 0, 0, 0.92);
 }
 
 .lp-screen {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 49px;
+  border-radius: 45px;
   overflow: hidden;
   background: #050505;
   isolation: isolate;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.055),
+    inset 0 0 18px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(0, 0, 0, 0.9);
+}
+
+/* A restrained glass reflection keeps large black areas from reading as a
+   flat CSS card while leaving the app UI legible. */
+.lp-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0.12), transparent 16% 67%, rgba(255, 255, 255, 0.028) 83%, transparent),
+    radial-gradient(70% 24% at 48% -3%, rgba(255, 255, 255, 0.1), transparent 72%);
+  opacity: 0.34;
 }
 
 /* the four app screens, stacked and cross-faded */
@@ -527,7 +503,9 @@
   background:
     radial-gradient(60% 45% at 30% 22%, rgba(255, 255, 255, 0.07), transparent 60%),
     linear-gradient(160deg, #2a2a2f 0%, #131316 40%, #1e1e22 70%, #0d0d10 100%);
-  box-shadow: inset 0 0 0 2.5px #3a3a41;
+  box-shadow:
+    inset 0 0 0 2px #333339,
+    inset 0 0 30px rgba(255, 255, 255, 0.025);
   padding: 22px;
 }
 

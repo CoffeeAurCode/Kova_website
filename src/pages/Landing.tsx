@@ -9,70 +9,55 @@ const APP_STORE_URL = 'https://apps.apple.com/in/app/entrava-nightlife/id6789246
 /* ============================================================================
    THE MOTION MODEL
    ----------------------------------------------------------------------------
-   One phone. Four scenes. Between every pair of scenes it performs the flip
-   from the client's reference clip: a full turn about its own long axis while
-   it travels across the viewport, tumbling on the screen plane as it goes.
+   One phone. Four scenes. Between every pair of scenes it follows the supplied
+   frame sequence: portrait hold, pitched landscape swoop, a brief edge-on
+   silhouette, then the next front-facing pose.
 
    Reading a pose:
      x, y   percent of viewport width / height, from centre
      s      scale multiplier (the responsive fit is applied on top)
      rx     screen-space tilt, degrees
-     ry     spin about the phone's long axis, degrees — CUMULATIVE, never
-            wrapped to 0..360, because the whole point is that consecutive
-            scenes are a full revolution apart, not 40 degrees apart.
+     ry     turn around the phone's long axis, degrees
      rz     screen-space tumble, degrees
-
-   Why ry runs -20 -> -340 -> -740 -> -1080 and not -20 -> +20 -> -20 -> 0:
-   those pairs are congruent mod 360, so they LOOK identical at rest, but
-   interpolating the short way turns a 360-degree flip into a 40-degree wobble
-   that never shows the back panel. The long numbers ARE the animation.
    ========================================================================== */
 
 type Pose = { x: number; y: number; s: number; rx: number; ry: number; rz: number }
-type Swing = { x: number; y: number; s: number; rx: number; rz: number }
 
 const DESK_REST: Pose[] = [
-  { x: 25.5, y: -1.0, s: 1.0, rx: 4, ry: -20, rz: 6 },
-  { x: -25.5, y: -1.0, s: 1.0, rx: 4, ry: -340, rz: -6 },
-  { x: 25.5, y: -1.0, s: 1.0, rx: 4, ry: -740, rz: 6 },
-  { x: 0, y: -1.5, s: 1.03, rx: 0, ry: -1080, rz: 0 },
-]
-
-/* Added at the midpoint of each gap, on top of the straight interpolation, so
-   the phone arcs instead of sliding along a ruler. */
-const DESK_SWING: Swing[] = [
-  { x: -3.5, y: -5, s: -0.055, rx: -10, rz: -52 },
-  { x: 3.5, y: -5, s: -0.055, rx: -10, rz: 52 },
-  { x: -6, y: -4, s: -0.045, rx: -8, rz: -34 },
+  { x: 25.5, y: -1.0, s: 1.0, rx: -3, ry: -16, rz: 5 },
+  { x: -25.5, y: -1.0, s: 1.0, rx: -3, ry: 16, rz: -5 },
+  { x: 25.5, y: -1.0, s: 1.0, rx: -3, ry: -16, rz: 5 },
+  { x: 0, y: -1.5, s: 1.03, rx: 0, ry: 0, rz: 0 },
 ]
 
 const MOB_REST: Pose[] = [
-  { x: 8, y: 0, s: 1.0, rx: 3, ry: -18, rz: 5 },
-  { x: -8, y: 0, s: 1.0, rx: 3, ry: -342, rz: -5 },
-  { x: 8, y: 0, s: 1.0, rx: 3, ry: -738, rz: 5 },
-  { x: 0, y: 0, s: 1.02, rx: 0, ry: -1080, rz: 0 },
-]
-
-const MOB_SWING: Swing[] = [
-  { x: -2, y: -3.5, s: -0.06, rx: -8, rz: -42 },
-  { x: 2, y: -3.5, s: -0.06, rx: -8, rz: 42 },
-  { x: -3, y: -3, s: -0.05, rx: -6, rz: -28 },
+  { x: 8, y: 0, s: 1.0, rx: -2, ry: -14, rz: 4 },
+  { x: -8, y: 0, s: 1.0, rx: -2, ry: 14, rz: -4 },
+  { x: 8, y: 0, s: 1.0, rx: -2, ry: -14, rz: 4 },
+  { x: 0, y: 0, s: 1.02, rx: 0, ry: 0, rz: 0 },
 ]
 
 /* Fraction of each gap spent parked at a rest pose, so a scene reads as still
    while its copy is being read, and the travel feels like a decision. */
-const HOLD = 0.2
+const HOLD = 0.18
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v)
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 const easeInOut = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 
-/* The tumble peaks at roughly a third of the way through the flip — the phone
-   is thrown, tilts hard, then rights itself. A symmetric bump peaks at the
-   halfway mark and reads like a pendulum instead. */
-const bumpSym = (t: number) => Math.sin(Math.PI * t)
-const bumpEarly = (t: number) => Math.sin(Math.PI * Math.pow(t, 0.62))
+/* Interpolate a pose without forcing the browser to choose a rotational path. */
+const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
+  x: lerp(a.x, b.x, t),
+  y: lerp(a.y, b.y, t),
+  s: lerp(a.s, b.s, t),
+  rx: lerp(a.rx, b.rx, t),
+  ry: lerp(a.ry, b.ry, t),
+  rz: lerp(a.rz, b.rz, t),
+})
+
+const between = (a: Pose, b: Pose, t: number, start: number, end: number) =>
+  mixPose(a, b, easeInOut(clamp((t - start) / (end - start), 0, 1)))
 
 const topOf = (el: HTMLElement) => el.getBoundingClientRect().top + window.scrollY
 
@@ -98,6 +83,7 @@ export default function Landing() {
   const pRender = useRef(0)
   const screenRef = useRef(0)
   const rafId = useRef(0)
+  const tickRef = useRef<(time: number) => void>(() => undefined)
   const lastT = useRef(0)
   const reduced = useRef(false)
 
@@ -158,7 +144,6 @@ export default function Landing() {
     const { ps } = track.current
     const { mobile } = view.current
     const REST = mobile ? MOB_REST : DESK_REST
-    const SWING = mobile ? MOB_SWING : DESK_SWING
 
     if (p <= ps[0]) return { pose: REST[0], scr: 0 }
     if (p >= ps[3]) return { pose: REST[3], scr: 3 }
@@ -168,27 +153,53 @@ export default function Landing() {
 
     const span = Math.max(1e-6, ps[i + 1] - ps[i])
     const q = clamp((p - ps[i]) / span, 0, 1)
-    const te = easeInOut(clamp((q - HOLD) / (1 - 2 * HOLD), 0, 1))
+    const t = clamp((q - HOLD) / (1 - 2 * HOLD), 0, 1)
 
     const a = REST[i]
     const b = REST[i + 1]
-    const sw = SWING[i]
-    const bs = bumpSym(te)
-    const be = bumpEarly(te)
+    const direction = Math.sign(b.x - a.x) || (i % 2 === 0 ? -1 : 1)
+    const lift = mobile ? -3.5 : -6.5
+    const scaleDrop = mobile ? 0.075 : 0.06
+
+    /* The supplied flip is not a full Y-axis spin. Its distinct beats are a
+       landscape pitch, a narrow edge, and a front-facing recovery from the
+       other side. Explicit waypoints preserve that silhouette and prevent a
+       long, fake-looking view of the phone's back. */
+    const landscape: Pose = {
+      x: lerp(a.x, b.x, 0.32),
+      y: lerp(a.y, b.y, 0.32) + lift,
+      s: lerp(a.s, b.s, 0.32) - scaleDrop,
+      rx: 66,
+      ry: a.ry * 0.72,
+      rz: -direction * (mobile ? 60 : 72),
+    }
+    const edge: Pose = {
+      x: lerp(a.x, b.x, 0.55),
+      y: lerp(a.y, b.y, 0.55) + lift * 0.8,
+      s: lerp(a.s, b.s, 0.55) - scaleDrop * 1.15,
+      rx: 7,
+      ry: direction * 88,
+      rz: -direction * 3,
+    }
+    const emerge: Pose = {
+      x: lerp(a.x, b.x, 0.78),
+      y: lerp(a.y, b.y, 0.78) + lift * 0.25,
+      s: lerp(a.s, b.s, 0.78) - scaleDrop * 0.35,
+      rx: -5,
+      ry: b.ry * 1.45,
+      rz: b.rz * 1.45,
+    }
+
+    let pose: Pose
+    if (t < 0.36) pose = between(a, landscape, t, 0, 0.36)
+    else if (t < 0.56) pose = between(landscape, edge, t, 0.36, 0.56)
+    else if (t < 0.78) pose = between(edge, emerge, t, 0.56, 0.78)
+    else pose = between(emerge, b, t, 0.78, 1)
 
     return {
-      pose: {
-        x: lerp(a.x, b.x, te) + sw.x * bs,
-        y: lerp(a.y, b.y, te) + sw.y * bs,
-        s: lerp(a.s, b.s, te) + sw.s * bs,
-        rx: lerp(a.rx, b.rx, te) + sw.rx * bs,
-        ry: lerp(a.ry, b.ry, te),
-        rz: lerp(a.rz, b.rz, te) + sw.rz * be,
-      },
-      /* Swap at te = 0.5, where ry is exactly half a revolution in: the front
-         face is turned fully away and backface-visibility has hidden it. The
-         change is not merely disguised, it is unobservable. */
-      scr: te >= 0.5 ? i + 1 : i,
+      pose,
+      /* Swap while the handset is only a metal sliver. */
+      scr: t >= 0.56 ? i + 1 : i,
     }
   }, [])
 
@@ -264,7 +275,7 @@ export default function Landing() {
       /* Frame-rate independent damping: the same feel at 60Hz and 120Hz. */
       pRender.current += diff * (1 - Math.exp(-dt * 9.5))
       paint(pRender.current)
-      rafId.current = requestAnimationFrame(tick)
+      rafId.current = requestAnimationFrame(tickRef.current)
     },
     [paint]
   )
@@ -291,6 +302,7 @@ export default function Landing() {
 
   /* ---------------------------------------------------------------------- */
   useLayoutEffect(() => {
+    tickRef.current = tick
     reduced.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     measure()
@@ -328,7 +340,7 @@ export default function Landing() {
       if (rafId.current) cancelAnimationFrame(rafId.current)
       rafId.current = 0
     }
-  }, [measure, onScroll, paint])
+  }, [measure, onScroll, paint, tick])
 
   /* --- reveal copy as each section arrives ------------------------------ */
   useEffect(() => {
