@@ -1,0 +1,1148 @@
+/* ============================================================================
+   ENTRAVA — landing page
+   ----------------------------------------------------------------------------
+   One persistent 3D phone travels right -> left -> right -> centre while four
+   copy sections scroll past it in normal flow. See src/pages/Landing.tsx for
+   the motion engine; this file owns every pixel of the look.
+
+   ARCHITECTURE WARNING
+   --------------------
+   .lp-phone-layer is position:sticky with margin-bottom:-100svh so it takes up
+   ZERO flow height. Never give it a real height, never put the phone inside a
+   section, and never put overflow-x:hidden on <html> or <body> — overflow-x
+   forces overflow-y to a non-visible value, which silently kills sticky and the
+   phone disappears mid-page. Use `clip`, which keeps the other axis visible.
+   ========================================================================== */
+
+.lp {
+  /* ---- design tokens ---------------------------------------------------- */
+  --bg: #050505;
+  --bg-soft: #0b0b0a;
+  --gold: #c9b38a;
+  --gold-light: #d8c7a8;
+  --gold-deep: #a98f63;
+  --text: #f1eee8;
+  --text-2: #9a9895;
+  --text-3: #6b6a67;
+  --line: rgba(201, 179, 138, 0.16);
+
+  --serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mark: 'Italiana', 'Playfair Display', Georgia, serif;
+
+  /* ---- phone geometry (base, before the animated scale) ----------------- */
+  --pw: 300px;
+  --ph: 618px;
+  --pd: 13px;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-x: clip;
+  position: relative;
+}
+
+.lp *,
+.lp *::before,
+.lp *::after {
+  box-sizing: border-box;
+}
+
+/* A single warm wash so the page is never flat black. */
+.lp::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(120% 80% at 78% 12%, rgba(201, 179, 138, 0.055), transparent 60%),
+    radial-gradient(90% 70% at 12% 88%, rgba(201, 179, 138, 0.035), transparent 62%);
+}
+
+/* ============================================================================
+   NAV
+   ========================================================================== */
+
+.lp-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: clamp(24px, 3.2vw, 56px);
+  padding: 22px clamp(20px, 4vw, 64px);
+  transition: background-color 0.45s ease, backdrop-filter 0.45s ease,
+    border-color 0.45s ease, padding 0.45s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.lp-nav[data-scrolled='true'] {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  background: rgba(5, 5, 5, 0.72);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border-bottom-color: rgba(201, 179, 138, 0.1);
+}
+
+.lp-brand {
+  font-family: var(--mark);
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--gold-light);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.lp-brand:hover {
+  color: #efe4cd;
+}
+
+.lp-nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 40px);
+  margin-left: clamp(12px, 2vw, 34px);
+}
+
+.lp-nav-link {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.lp-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lp-nav-link:hover {
+  color: var(--gold-light);
+}
+.lp-nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.lp-nav-spacer {
+  flex: 1;
+}
+
+/* ---- the gold pill CTA -------------------------------------------------- */
+.lp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  border: 0;
+  background: linear-gradient(135deg, #e3d4b6 0%, #cbb590 52%, #dfceac 100%);
+  color: #14110c;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 6px 30px rgba(201, 179, 138, 0.14);
+}
+.lp-cta--nav {
+  padding: 13px 26px;
+}
+.lp-cta-short {
+  display: none;
+}
+.lp-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 44px rgba(201, 179, 138, 0.28);
+}
+.lp-cta:active {
+  transform: translateY(0);
+}
+/* sheen sweep */
+.lp-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lp-cta:hover::before {
+  transform: translateX(120%);
+}
+.lp-cta svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lp-cta:hover svg {
+  transform: translateX(4px);
+}
+
+/* mobile nav toggle */
+.lp-burger {
+  display: none;
+  background: none;
+  border: 1px solid rgba(201, 179, 138, 0.28);
+  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-light);
+  cursor: pointer;
+}
+
+.lp-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  /* Fully opaque. At 0.97 the hero headline still read through clearly and the
+     drawer looked like a bug rather than a layer. */
+  background:
+    radial-gradient(120% 60% at 80% 0%, rgba(201, 179, 138, 0.07), transparent 60%),
+    #050505;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 32px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.lp-drawer[data-open='true'] {
+  opacity: 1;
+  visibility: visible;
+}
+.lp-drawer button {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(201, 179, 138, 0.12);
+  padding: 22px 0;
+  text-align: left;
+  font-family: var(--serif);
+  font-size: 30px;
+  color: var(--text);
+  cursor: pointer;
+  transform: translateY(14px);
+  opacity: 0;
+  transition: transform 0.55s cubic-bezier(0.19, 1, 0.22, 1),
+    opacity 0.55s ease, color 0.3s ease;
+}
+.lp-drawer button:hover {
+  color: var(--gold-light);
+}
+.lp-drawer[data-open='true'] button {
+  transform: none;
+  opacity: 1;
+}
+.lp-drawer[data-open='true'] button:nth-of-type(1) { transition-delay: 0.06s; }
+.lp-drawer[data-open='true'] button:nth-of-type(2) { transition-delay: 0.12s; }
+.lp-drawer[data-open='true'] button:nth-of-type(3) { transition-delay: 0.18s; }
+.lp-drawer[data-open='true'] button:nth-of-type(4) { transition-delay: 0.24s; }
+
+/* ============================================================================
+   SCROLL JOURNEY
+   ========================================================================== */
+
+.lp-journey {
+  position: relative;
+  z-index: 1;
+}
+
+.lp-phone-layer {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  margin-bottom: -100svh; /* <- cancels its own flow height. Do not remove. */
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 6;
+  perspective: 1700px;
+  perspective-origin: 50% 48%;
+  display: grid;
+  place-items: center;
+}
+
+/* travel + scale live here */
+.lp-scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* The warm pool of light that follows the phone.
+   It is a SIBLING of .lp-scene, not a child, and deliberately so: inside a
+   preserve-3d context this 1200px plane sits at z=0 and physically intersects
+   the phone box (which spans z=-6.5..+6.5). Chrome then sorts the two per
+   polygon and paints a hard seam straight down the phone. Light is not an
+   object in the scene — keep it out of the scene's coordinate space. */
+.lp-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 132vmin;
+  height: 132vmin;
+  margin-left: -66vmin;
+  margin-top: -66vmin;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(214, 179, 116, 0.2) 0%,
+    rgba(190, 152, 92, 0.1) 26%,
+    rgba(120, 92, 48, 0.045) 46%,
+    transparent 64%
+  );
+  filter: blur(6px);
+  will-change: transform, opacity;
+}
+
+/* rotation lives here */
+.lp-phone-rot {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.lp-phone {
+  position: relative;
+  width: var(--pw);
+  height: var(--ph);
+  transform-style: preserve-3d;
+}
+
+/* ---- the six faces of a real 3D box ------------------------------------ */
+.lp-face {
+  position: absolute;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.lp-face-front,
+.lp-face-back {
+  left: 0;
+  top: 0;
+  width: var(--pw);
+  height: var(--ph);
+  border-radius: 52px;
+}
+.lp-face-front {
+  transform: translateZ(calc(var(--pd) / 2));
+}
+.lp-face-back {
+  transform: rotateY(180deg) translateZ(calc(var(--pd) / 2));
+}
+
+.lp-face-left,
+.lp-face-right {
+  top: 0;
+  left: calc(50% - var(--pd) / 2);
+  width: var(--pd);
+  height: var(--ph);
+  border-radius: 4px;
+}
+.lp-face-left {
+  transform: rotateY(-90deg) translateZ(calc(var(--pw) / 2));
+}
+.lp-face-right {
+  transform: rotateY(90deg) translateZ(calc(var(--pw) / 2));
+}
+
+.lp-face-top,
+.lp-face-bottom {
+  left: 0;
+  top: calc(50% - var(--pd) / 2);
+  width: var(--pw);
+  height: var(--pd);
+  border-radius: 4px;
+}
+.lp-face-top {
+  transform: rotateX(90deg) translateZ(calc(var(--ph) / 2));
+}
+.lp-face-bottom {
+  transform: rotateX(-90deg) translateZ(calc(var(--ph) / 2));
+}
+
+/* ---- titanium rails ----------------------------------------------------- */
+.lp-face-left,
+.lp-face-right {
+  background: linear-gradient(
+    90deg,
+    #16161a 0%,
+    #55555c 14%,
+    #9a9aa2 34%,
+    #6d6d75 54%,
+    #34343a 78%,
+    #131317 100%
+  );
+}
+.lp-face-top,
+.lp-face-bottom {
+  background: linear-gradient(
+    180deg,
+    #16161a 0%,
+    #55555c 18%,
+    #92929a 42%,
+    #4b4b52 74%,
+    #131317 100%
+  );
+}
+
+/* physical buttons on the rails */
+.lp-btn {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #26262b, #85858d 40%, #4a4a51 70%, #1d1d21);
+}
+.lp-btn-action {
+  top: 20%;
+  height: 30px;
+}
+.lp-btn-vup {
+  top: 27.5%;
+  height: 46px;
+}
+.lp-btn-vdn {
+  top: 36%;
+  height: 46px;
+}
+.lp-btn-power {
+  top: 29%;
+  height: 74px;
+}
+
+/* ---- front frame + screen ---------------------------------------------- */
+.lp-face-front {
+  padding: 3px;
+  background: linear-gradient(
+    148deg,
+    #7e7e87 0%,
+    #303036 22%,
+    #5d5d66 44%,
+    #232328 66%,
+    #6f6f78 84%,
+    #1c1c20 100%
+  );
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.9),
+    0 60px 120px -30px rgba(0, 0, 0, 0.95);
+}
+
+.lp-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 49px;
+  overflow: hidden;
+  background: #050505;
+  isolation: isolate;
+}
+
+/* the four app screens, stacked and cross-faded */
+.lp-scr {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.24s linear;
+  display: flex;
+  flex-direction: column;
+  /* the wallpaper the app ships with: a soft titanium swirl */
+  background:
+    radial-gradient(90% 60% at 22% 14%, rgba(255, 255, 255, 0.07), transparent 60%),
+    radial-gradient(70% 50% at 82% 86%, rgba(255, 255, 255, 0.05), transparent 62%),
+    #070707;
+}
+.lp-scr[data-on='true'] {
+  opacity: 1;
+}
+
+/* dynamic island */
+.lp-island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 27px;
+  border-radius: 999px;
+  background: #000;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 9px;
+}
+.lp-island::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2a3a4a, #05080c 70%);
+  box-shadow: inset 0 0 2px rgba(120, 170, 220, 0.5);
+}
+
+/* ---- back panel --------------------------------------------------------- */
+.lp-face-back {
+  background:
+    radial-gradient(60% 45% at 30% 22%, rgba(255, 255, 255, 0.07), transparent 60%),
+    linear-gradient(160deg, #2a2a2f 0%, #131316 40%, #1e1e22 70%, #0d0d10 100%);
+  box-shadow: inset 0 0 0 2.5px #3a3a41;
+  padding: 22px;
+}
+
+.lp-cam {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 108px;
+  height: 108px;
+  border-radius: 34px;
+  background: linear-gradient(150deg, #35353b, #17171a 60%, #232328);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  padding: 9px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.lp-lens {
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #4d5a68 0%, #10141a 46%, #05070a 100%);
+  box-shadow: inset 0 0 0 2.5px #2b2b31, 0 0 6px rgba(0, 0, 0, 0.8);
+  position: relative;
+}
+.lp-lens::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(150, 200, 255, 0.5), transparent 62%);
+}
+.lp-lens:nth-child(3) {
+  grid-column: 1;
+}
+.lp-flash {
+  grid-column: 2;
+  align-self: end;
+  justify-self: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f7edd0, #8b7f5e 60%, #2a2620);
+}
+
+.lp-back-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--mark);
+  font-size: 26px;
+  letter-spacing: 0.16em;
+  color: rgba(201, 179, 138, 0.34);
+}
+
+.lp-back-foot {
+  position: absolute;
+  bottom: 26px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 7px;
+  letter-spacing: 0.24em;
+  color: rgba(255, 255, 255, 0.16);
+}
+
+/* ============================================================================
+   COPY SECTIONS
+   ========================================================================== */
+
+.lp-sec {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  padding: 120px 0;
+}
+
+.lp-sec-inner {
+  position: relative;
+  z-index: 2;
+  width: min(1380px, 90vw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: clamp(32px, 5vw, 90px);
+  align-items: center;
+}
+
+/* which half the words live in — the other half is the phone's */
+.lp-sec[data-copy='left'] .lp-copy {
+  grid-column: 1;
+}
+.lp-sec[data-copy='right'] .lp-copy {
+  grid-column: 2;
+}
+
+.lp-copy {
+  max-width: 640px;
+}
+
+/* ---- eyebrow ------------------------------------------------------------ */
+.lp-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: clamp(22px, 3vw, 38px);
+}
+.lp-eyebrow span {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.lp-eyebrow i {
+  display: block;
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+/* ---- headline ----------------------------------------------------------- */
+.lp-h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.95;
+  margin: 0 0 clamp(22px, 2.6vw, 34px);
+  font-size: clamp(46px, 6.1vw, 96px);
+  color: var(--gold-light);
+}
+
+.lp-h1 .lp-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+.lp-h1 .lp-line > span {
+  display: block;
+  transform: translateY(112%);
+  transition: transform 1.05s cubic-bezier(0.19, 1, 0.22, 1);
+  background: linear-gradient(178deg, #ece1c9 4%, #cdb78e 56%, #a68e63 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lp-lead {
+  font-size: clamp(15px, 1.18vw, 18px);
+  line-height: 1.85;
+  color: var(--text-2);
+  margin: 0 0 clamp(28px, 3vw, 42px);
+  max-width: 34em;
+}
+.lp-lead strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.lp-kicker {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 12px;
+}
+.lp-kicker-body {
+  font-size: clamp(14px, 1.05vw, 16.5px);
+  color: var(--text-2);
+  margin: 0;
+  line-height: 1.8;
+}
+
+/* ---- reveal choreography ------------------------------------------------ */
+.lp-rv {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.95s cubic-bezier(0.19, 1, 0.22, 1),
+    transform 0.95s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.lp-in .lp-rv {
+  opacity: 1;
+  transform: none;
+}
+.lp-in .lp-h1 .lp-line > span {
+  transform: none;
+}
+.lp-in .lp-rv-1 { transition-delay: 0.08s; }
+.lp-in .lp-rv-2 { transition-delay: 0.16s; }
+.lp-in .lp-rv-3 { transition-delay: 0.26s; }
+.lp-in .lp-rv-4 { transition-delay: 0.36s; }
+.lp-in .lp-h1 .lp-line:nth-child(1) > span { transition-delay: 0.06s; }
+.lp-in .lp-h1 .lp-line:nth-child(2) > span { transition-delay: 0.14s; }
+.lp-in .lp-h1 .lp-line:nth-child(3) > span { transition-delay: 0.22s; }
+
+/* ---- the giant ghost word behind each scene ---------------------------- */
+.lp-ghost {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--serif);
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-size: clamp(140px, 20vw, 320px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(180deg, rgba(233, 222, 200, 0.085), rgba(201, 179, 138, 0.02));
+  -webkit-background-clip: text;
+  background-clip: text;
+  will-change: transform;
+}
+
+/* the finale word is the backdrop of the whole scene, so it carries further */
+.lp-sec-finale .lp-ghost {
+  background: linear-gradient(180deg, rgba(238, 229, 210, 0.16), rgba(201, 179, 138, 0.045));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* ---- scroll cue --------------------------------------------------------- */
+.lp-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 3;
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.lp-cue i {
+  display: block;
+  width: 1px;
+  height: 52px;
+  background: linear-gradient(180deg, transparent, rgba(201, 179, 138, 0.55), transparent);
+  animation: lp-cue-run 2.4s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+}
+@keyframes lp-cue-run {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ============================================================================
+   FINALE — the two gates
+   ========================================================================== */
+
+.lp-sec-finale .lp-sec-inner {
+  display: block;
+}
+
+.lp-gates {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 0.62fr) 1fr;
+  align-items: stretch;
+  gap: 0;
+}
+
+.lp-gate {
+  border: 1px solid var(--line);
+  background: linear-gradient(150deg, rgba(20, 19, 17, 0.86), rgba(9, 9, 8, 0.78));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: clamp(28px, 2.6vw, 44px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.55s ease;
+}
+.lp-gate:first-child {
+  border-radius: 22px 0 0 22px;
+  border-right: 0;
+}
+.lp-gate:last-child {
+  border-radius: 0 22px 22px 0;
+  border-left: 0;
+}
+.lp-gate:hover {
+  border-color: rgba(201, 179, 138, 0.42);
+  transform: translateY(-4px);
+}
+
+.lp-gate-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.lp-gate-icon {
+  flex: none;
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border: 1px solid rgba(201, 179, 138, 0.24);
+  background: rgba(201, 179, 138, 0.055);
+}
+.lp-gate-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 6px;
+}
+.lp-gate-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: clamp(28px, 2.5vw, 40px);
+  line-height: 1;
+  margin: 0;
+  color: var(--gold-light);
+}
+.lp-gate-body {
+  font-size: 14.5px;
+  color: var(--text-2);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.lp-gate-link {
+  margin-top: auto;
+  padding-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: color 0.35s ease;
+}
+.lp-gate-link i {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 179, 138, 0.34);
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  transition: background-color 0.4s ease, color 0.4s ease, transform 0.4s ease;
+}
+.lp-gate-link:hover {
+  color: var(--gold-light);
+}
+.lp-gate-link:hover i {
+  background: var(--gold);
+  color: #14110c;
+  transform: translateX(4px);
+}
+.lp-gate-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* the phone's lane between the two cards */
+.lp-gate-gap {
+  min-height: 1px;
+}
+
+/* ============================================================================
+   FOOTER
+   ========================================================================== */
+
+.lp-footer {
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid rgba(201, 179, 138, 0.1);
+  padding: clamp(56px, 6vw, 88px) clamp(20px, 4vw, 64px) 40px;
+  background: var(--bg);
+}
+.lp-footer-inner {
+  width: min(1380px, 90vw);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.lp-footer p {
+  color: var(--text-3);
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.8;
+}
+/* Must out-specify `.lp-footer p` above, which is 0,1,1 and would otherwise
+   repaint the gold wordmark grey. */
+.lp-footer p.lp-footer-mark {
+  font-family: var(--mark);
+  font-size: 40px;
+  letter-spacing: 0.12em;
+  color: var(--gold-light);
+  margin: 0 0 14px;
+}
+.lp-footer-cols {
+  display: flex;
+  gap: clamp(38px, 5vw, 80px);
+  flex-wrap: wrap;
+}
+.lp-footer-col h4 {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 16px;
+}
+.lp-footer-col a,
+.lp-footer-col button {
+  display: block;
+  background: none;
+  border: 0;
+  padding: 0 0 11px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--text-2);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.3s ease;
+}
+.lp-footer-col a:hover,
+.lp-footer-col button:hover {
+  color: var(--gold-light);
+}
+.lp-footer-base {
+  width: min(1380px, 90vw);
+  margin: clamp(44px, 5vw, 70px) auto 0;
+  padding-top: 26px;
+  border-top: 1px solid rgba(201, 179, 138, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .lp-nav-links {
+    gap: 20px;
+  }
+}
+
+/* --- the stack point: copy above, phone below --------------------------- */
+@media (max-width: 900px) {
+  .lp-nav-links {
+    display: none;
+  }
+  .lp-burger {
+    display: flex;
+  }
+  .lp-nav {
+    gap: 14px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  /* the full label will not fit beside a wordmark and a burger at 360dp */
+  .lp-cta--nav {
+    padding: 12px 18px;
+    letter-spacing: 0.12em;
+  }
+  .lp-cta-long {
+    display: none;
+  }
+  .lp-cta-short {
+    display: inline;
+  }
+  .lp-drawer .lp-cta-long {
+    display: inline;
+  }
+  .lp-drawer .lp-cta-short {
+    display: none;
+  }
+
+  .lp-sec {
+    padding: 0;
+    align-items: start;
+  }
+  .lp-sec-inner {
+    width: 88vw;
+    grid-template-columns: 1fr;
+    padding-top: 108px;
+  }
+  .lp-sec[data-copy='left'] .lp-copy,
+  .lp-sec[data-copy='right'] .lp-copy {
+    grid-column: 1;
+  }
+  .lp-copy {
+    max-width: none;
+  }
+
+  /* Stacked layout puts the copy at the top, so the ghost word drops to sit
+     behind the PHONE instead of behind the text it would otherwise fight. */
+  .lp-ghost {
+    font-size: 24vw;
+    top: 70%;
+  }
+  /* the finale is ~2 viewports tall on mobile; keep the word with the phone,
+     and let it wrap — "USE ENTRAVA" on one line at 24vw shows four letters */
+  .lp-sec-finale .lp-ghost {
+    top: 50svh;
+    font-size: 19vw;
+    line-height: 0.84;
+    white-space: normal;
+  }
+
+  .lp-cue {
+    display: none;
+  }
+
+  /* the QR screen gets a viewport of its own, then the cards rise into it */
+  .lp-gates {
+    grid-template-columns: 1fr;
+    margin-top: 100svh;
+    gap: 14px;
+  }
+  .lp-gate:first-child,
+  .lp-gate:last-child {
+    border-radius: 20px;
+    border: 1px solid var(--line);
+  }
+
+  .lp-footer-inner {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 900px) and (max-height: 720px) {
+  .lp-sec-inner {
+    padding-top: 88px;
+  }
+  .lp-h1 {
+    font-size: clamp(30px, 8.6vw, 42px);
+    margin-bottom: 16px;
+  }
+  .lp-eyebrow {
+    margin-bottom: 16px;
+  }
+  .lp-lead {
+    font-size: 14px;
+    line-height: 1.62;
+    margin-bottom: 18px;
+  }
+  .lp-kicker {
+    margin-bottom: 8px;
+  }
+  .lp-kicker-body {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .lp-h1 {
+    font-size: clamp(38px, 11vw, 54px);
+  }
+  .lp-brand {
+    font-size: 23px;
+  }
+  .lp-cta {
+    padding: 14px 24px;
+    font-size: 10.5px;
+  }
+}
+
+/* --- honour the OS switch ------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .lp *,
+  .lp *::before,
+  .lp *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .lp-rv,
+  .lp-h1 .lp-line > span {
+    opacity: 1;
+    transform: none;
+  }
+}
