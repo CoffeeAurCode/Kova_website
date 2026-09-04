@@ -9,55 +9,61 @@ const APP_STORE_URL = 'https://apps.apple.com/in/app/entrava-nightlife/id6789246
 /* ============================================================================
    THE MOTION MODEL
    ----------------------------------------------------------------------------
-   One phone. Four scenes. Between every pair of scenes it follows the supplied
-   frame sequence: portrait hold, pitched landscape swoop, a brief edge-on
-   silhouette, then the next front-facing pose.
+   One phone. Four scenes. Each move is a continuous physical rotation: the
+   front leaves, the back passes through the midpoint, and the next screen
+   returns on the front. Pitch and roll keep the motion from feeling like a
+   product spinning on a turntable.
 
    Reading a pose:
      x, y   percent of viewport width / height, from centre
      s      scale multiplier (the responsive fit is applied on top)
      rx     screen-space tilt, degrees
-     ry     turn around the phone's long axis, degrees
+     ry     continuous spin around the phone's long axis, degrees
      rz     screen-space tumble, degrees
    ========================================================================== */
 
 type Pose = { x: number; y: number; s: number; rx: number; ry: number; rz: number }
+type Swing = { x: number; y: number; s: number; rx: number; rz: number }
 
 const DESK_REST: Pose[] = [
   { x: 25.5, y: -1.0, s: 1.0, rx: -3, ry: -16, rz: 5 },
-  { x: -25.5, y: -1.0, s: 1.0, rx: -3, ry: 16, rz: -5 },
-  { x: 25.5, y: -1.0, s: 1.0, rx: -3, ry: -16, rz: 5 },
-  { x: 0, y: -1.5, s: 1.03, rx: 0, ry: 0, rz: 0 },
+  { x: -25.5, y: -1.0, s: 1.0, rx: -3, ry: -344, rz: -5 },
+  { x: 25.5, y: -1.0, s: 1.0, rx: -3, ry: -736, rz: 5 },
+  { x: 0, y: -1.5, s: 1.03, rx: 0, ry: -1080, rz: 0 },
 ]
 
 const MOB_REST: Pose[] = [
   { x: 8, y: 0, s: 1.0, rx: -2, ry: -14, rz: 4 },
-  { x: -8, y: 0, s: 1.0, rx: -2, ry: 14, rz: -4 },
-  { x: 8, y: 0, s: 1.0, rx: -2, ry: -14, rz: 4 },
-  { x: 0, y: 0, s: 1.02, rx: 0, ry: 0, rz: 0 },
+  { x: -8, y: 0, s: 1.0, rx: -2, ry: -346, rz: -4 },
+  { x: 8, y: 0, s: 1.0, rx: -2, ry: -734, rz: 4 },
+  { x: 0, y: 0, s: 1.02, rx: 0, ry: -1080, rz: 0 },
+]
+
+const DESK_SWING: Swing[] = [
+  { x: -2.5, y: -5.5, s: -0.045, rx: 28, rz: 43 },
+  { x: 2.5, y: -5.5, s: -0.045, rx: 28, rz: -43 },
+  { x: -4, y: -4.5, s: -0.04, rx: 22, rz: 34 },
+]
+
+const MOB_SWING: Swing[] = [
+  { x: -1.5, y: -3, s: -0.05, rx: 22, rz: 34 },
+  { x: 1.5, y: -3, s: -0.05, rx: 22, rz: -34 },
+  { x: -2, y: -2.5, s: -0.045, rx: 18, rz: 27 },
 ]
 
 /* Fraction of each gap spent parked at a rest pose, so a scene reads as still
    while its copy is being read, and the travel feels like a decision. */
-const HOLD = 0.18
+const HOLD = 0.2
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v)
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 const easeInOut = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 
-/* Interpolate a pose without forcing the browser to choose a rotational path. */
-const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
-  x: lerp(a.x, b.x, t),
-  y: lerp(a.y, b.y, t),
-  s: lerp(a.s, b.s, t),
-  rx: lerp(a.rx, b.rx, t),
-  ry: lerp(a.ry, b.ry, t),
-  rz: lerp(a.rz, b.rz, t),
-})
-
-const between = (a: Pose, b: Pose, t: number, start: number, end: number) =>
-  mixPose(a, b, easeInOut(clamp((t - start) / (end - start), 0, 1)))
+/* A sine arc has zero displacement at both rests and a soft apex halfway
+   through the flip. The slightly early roll peak gives the handset momentum. */
+const bump = (t: number) => Math.sin(Math.PI * t)
+const bumpEarly = (t: number) => Math.sin(Math.PI * Math.pow(t, 0.78))
 
 const topOf = (el: HTMLElement) => el.getBoundingClientRect().top + window.scrollY
 
@@ -144,6 +150,7 @@ export default function Landing() {
     const { ps } = track.current
     const { mobile } = view.current
     const REST = mobile ? MOB_REST : DESK_REST
+    const SWING = mobile ? MOB_SWING : DESK_SWING
 
     if (p <= ps[0]) return { pose: REST[0], scr: 0 }
     if (p >= ps[3]) return { pose: REST[3], scr: 3 }
@@ -153,53 +160,25 @@ export default function Landing() {
 
     const span = Math.max(1e-6, ps[i + 1] - ps[i])
     const q = clamp((p - ps[i]) / span, 0, 1)
-    const t = clamp((q - HOLD) / (1 - 2 * HOLD), 0, 1)
+    const t = easeInOut(clamp((q - HOLD) / (1 - 2 * HOLD), 0, 1))
 
     const a = REST[i]
     const b = REST[i + 1]
-    const direction = Math.sign(b.x - a.x) || (i % 2 === 0 ? -1 : 1)
-    const lift = mobile ? -3.5 : -6.5
-    const scaleDrop = mobile ? 0.075 : 0.06
-
-    /* The supplied flip is not a full Y-axis spin. Its distinct beats are a
-       landscape pitch, a narrow edge, and a front-facing recovery from the
-       other side. Explicit waypoints preserve that silhouette and prevent a
-       long, fake-looking view of the phone's back. */
-    const landscape: Pose = {
-      x: lerp(a.x, b.x, 0.32),
-      y: lerp(a.y, b.y, 0.32) + lift,
-      s: lerp(a.s, b.s, 0.32) - scaleDrop,
-      rx: 66,
-      ry: a.ry * 0.72,
-      rz: -direction * (mobile ? 60 : 72),
-    }
-    const edge: Pose = {
-      x: lerp(a.x, b.x, 0.55),
-      y: lerp(a.y, b.y, 0.55) + lift * 0.8,
-      s: lerp(a.s, b.s, 0.55) - scaleDrop * 1.15,
-      rx: 7,
-      ry: direction * 88,
-      rz: -direction * 3,
-    }
-    const emerge: Pose = {
-      x: lerp(a.x, b.x, 0.78),
-      y: lerp(a.y, b.y, 0.78) + lift * 0.25,
-      s: lerp(a.s, b.s, 0.78) - scaleDrop * 0.35,
-      rx: -5,
-      ry: b.ry * 1.45,
-      rz: b.rz * 1.45,
-    }
-
-    let pose: Pose
-    if (t < 0.36) pose = between(a, landscape, t, 0, 0.36)
-    else if (t < 0.56) pose = between(landscape, edge, t, 0.36, 0.56)
-    else if (t < 0.78) pose = between(edge, emerge, t, 0.56, 0.78)
-    else pose = between(emerge, b, t, 0.78, 1)
+    const sw = SWING[i]
+    const arc = bump(t)
+    const roll = bumpEarly(t)
 
     return {
-      pose,
-      /* Swap while the handset is only a metal sliver. */
-      scr: t >= 0.56 ? i + 1 : i,
+      pose: {
+        x: lerp(a.x, b.x, t) + sw.x * arc,
+        y: lerp(a.y, b.y, t) + sw.y * arc,
+        s: lerp(a.s, b.s, t) + sw.s * arc,
+        rx: lerp(a.rx, b.rx, t) + sw.rx * arc,
+        ry: lerp(a.ry, b.ry, t),
+        rz: lerp(a.rz, b.rz, t) + sw.rz * roll,
+      },
+      /* The app screen changes while its face is completely turned away. */
+      scr: t >= 0.5 ? i + 1 : i,
     }
   }, [])
 

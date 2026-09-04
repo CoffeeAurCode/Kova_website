@@ -390,8 +390,10 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.08),
     inset 0 0 0 2px rgba(0, 0, 0, 0.48);
   transform: translateZ(var(--phone-z));
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  /* The chassis is physical material, so it must remain visible from the
+     rear when the animation passes through its full-back midpoint. */
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
 }
 
 /* Slim controls sit on the silhouette instead of being full-height rails. */
