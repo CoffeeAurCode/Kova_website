@@ -13,7 +13,7 @@ const problems = [
     label: 'Discovery',
     title: "You don't know what's on tonight",
     body: [
-      "No platform in India shows you what's happening at clubs tonight. You end up texting friends, scrolling 12 hour old Instagram stories, DMing a promoter who may not reply in time. You don't know the entry price until three people down the chain tell you — and if you're going to a new city, you're completely in the dark.",
+      "No platform in India shows you what's happening at clubs tonight. You end up texting friends, scrolling 12 hour old Instagram stories, DMing a promoter who may not reply in time. You don't know the entry price until three people down the chain tell you, and if you're going to a new city, you're completely in the dark.",
       'The information exists. It just lives scattered across WhatsApp forwards, promoter bios, and venue pages last updated in 2022.',
     ],
     solution: 'Entrava puts every event, every venue, and every price in one feed. Open the app, pick your city, know your night.',
@@ -24,7 +24,7 @@ const problems = [
     label: 'The Door',
     title: 'The door is chaos',
     body: [
-      "You get there at 11. It's not a queue anymore — it's a crowd of 50. The bouncer lets in 4 at a time. Some people who've paid are still outside. Cash is being thrown around. An hour later, you're still out there, not knowing if you're getting in.",
+      "You get there at 11. It's not a queue anymore. It's a crowd of 50. The bouncer lets in 4 at a time. Some people who've paid are still outside. Cash is being thrown around. An hour later, you're still out there, not knowing if you're getting in.",
       "The worst part? You've already spent ₹500 on an Uber and turned down two other plans. And you're standing on a pavement.",
     ],
     solution: 'Book on Entrava before you leave home. Show up, scan your QR, walk in.',
@@ -36,7 +36,7 @@ const problems = [
     title: 'Splitting a table is a mess',
     body: [
       "You buy a table with your 15 friends and while most pay, you know Aryan is never paying you back. Someone pays upfront, the rest promise to transfer, and by 2 AM you're the unofficial treasurer of a group that's too drunk to do arithmetic.",
-      'Add your friends on Entrava, book the table, and the app sends each person their share to pay — UPI or card. The QR unlocks for the whole group only once everyone has paid.',
+      'Add your friends on Entrava, book the table, and the app sends each person their share to pay by UPI or card. The QR unlocks for the whole group only once everyone has paid.',
     ],
     solution: 'No fronting. No chasing. No drama.',
     accent: 'Split it clean →',
@@ -49,7 +49,7 @@ const problems = [
       "Most venues are still cash-only at the door. Nobody carries cash anymore. The ATM is two streets away and has a queue. Your friends are waiting inside. You're the person holding everyone up.",
       'Pay by UPI or card on Entrava and get your QR instantly. Prefer cash? Pay the platform fee online to lock in your spot, and settle the rest at the door. Guaranteed entry either way.',
     ],
-    solution: 'UPI. Card. Or cash at the door. Your call — entry guaranteed.',
+    solution: 'UPI. Card. Or cash at the door. Your call, with entry guaranteed.',
     accent: 'Pay your way →',
   },
 ]
@@ -58,7 +58,7 @@ const pillars = [
   {
     number: '1',
     title: 'Discover',
-    body: 'Every event, every venue, every price — in one feed. Updated in real time. No more chasing promoters.',
+    body: 'Every event, every venue, every price in one feed. Updated in real time. No more chasing promoters.',
   },
   {
     number: '2',
@@ -269,9 +269,9 @@ export default function WhyEntrava() {
   }, [])
 
   return (
-    <div className="bg-black min-h-screen">
+    <div className="ep-page">
       {/* ── Hero ─────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-40 pb-32 px-6 md:px-16 lg:px-24 max-w-7xl mx-auto w-full">
+      <section className="ep-hero ep-hero--why">
         {/* Ambient glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none"
@@ -280,12 +280,12 @@ export default function WhyEntrava() {
           }}
         />
 
-        <div ref={heroRef} className="relative z-10 flex flex-col items-center text-center gap-6">
+        <div ref={heroRef} className="ep-hero-copy">
           {/* Back link */}
           <Link
             data-hero
             to="/"
-            className="flex items-center gap-2 text-white/40 text-sm font-body hover:text-white/70 transition-colors self-start mb-2"
+            className="hidden"
             style={{ opacity: 0 }}
           >
             <ArrowLeft size={14} />
@@ -295,40 +295,37 @@ export default function WhyEntrava() {
           {/* Badge */}
           <div
             data-hero
-            className="liquid-glass border-gold-shimmer rounded-full px-3.5 py-1 flex items-center bg-gold-gradient/10 border border-[#D4AF37]/30"
+            className="ep-kicker"
             style={{ opacity: 0 }}
           >
-            <span className="text-[#D4AF37] text-xs font-medium font-body uppercase tracking-widest">
-              Why Entrava
-            </span>
+            <span>Why Entrava</span>
           </div>
 
           {/* Heading */}
           <h1
             data-hero
-            className="text-5xl md:text-7xl lg:text-[5.5rem] font-heading italic text-gold-gradient leading-[0.88] max-w-4xl tracking-[-3px]"
+            className="ep-hero-title"
             style={{ opacity: 0 }}
           >
-            <BlurText text="The night was broken. We fixed it." delay={80} />
+            The system<br />is pure chaos.
           </h1>
 
           {/* Subtext */}
           <p
             data-hero
-            className="text-white/55 font-body font-light text-base md:text-lg max-w-xl leading-relaxed"
+            className="ep-hero-body"
             style={{ opacity: 0 }}
           >
-            India's nightlife had no infrastructure — no discovery, no booking, no split payments, no guaranteed entry. We built Entrava because we were tired of the same chaos every weekend.
+            Massive Crowds, No Organised System, and Pure Chaos.
           </p>
 
           {/* Scroll cue */}
           <div
             data-hero
-            className="flex flex-col items-center gap-2 mt-4"
+            className="ep-hero-note"
             style={{ opacity: 0 }}
           >
-            <span className="text-white/30 text-xs font-body uppercase tracking-widest">Four problems</span>
-            <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
+            <span>One platform. One solution.</span>
           </div>
         </div>
       </section>
@@ -361,7 +358,7 @@ export default function WhyEntrava() {
               <BlurText text="One app. Every night covered." delay={100} />
             </h2>
             <p className="text-white/50 font-body font-light text-sm md:text-base max-w-md">
-              From wondering what's on to walking through the door — Entrava handles every step so you don't have to.
+              From wondering what's on to walking through the door, Entrava handles every step so you don't have to.
             </p>
           </div>
 

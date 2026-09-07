@@ -690,7 +690,7 @@ export default function Landing() {
               <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
                 App Store
               </a>
-              <a href="mailto:entrava.app@gmail.com">Android — notify me</a>
+              <a href="mailto:entrava.app@gmail.com">Android, notify me</a>
             </div>
             <div className="lp-footer-col">
               <h4>Contact</h4>

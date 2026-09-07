@@ -153,7 +153,7 @@ function PriceFlowIllustration() {
 
       {/* Caption */}
       <p className="text-white/40 text-[11px] font-body font-light leading-relaxed border-t border-white/5 pt-4">
-        Paid placement for top-of-feed visibility will be available down the line — but listing itself will never cost you anything.
+        Paid placement for top-of-feed visibility will be available down the line, but listing itself will never cost you anything.
       </p>
     </div>
   )
@@ -266,7 +266,7 @@ function NoShowIllustration() {
 
               <div className="mt-2 rounded-xl p-4 border border-[#D4AF37]/30 bg-[#D4AF37]/5">
                 <p className="text-white/80 text-sm font-body leading-relaxed">
-                  <span className="text-[#D4AF37] font-medium">No-show?</span> You still keep the ₹150 — they paid to secure the spot.
+                  <span className="text-[#D4AF37] font-medium">No-show?</span> You still keep the ₹150 because they paid to secure the spot.
                 </p>
               </div>
             </motion.div>
@@ -319,7 +319,7 @@ function NoShowIllustration() {
 
               <div className="mt-2 rounded-xl p-4 border border-[#D4AF37]/30 bg-[#D4AF37]/5">
                 <p className="text-white/80 text-sm font-body leading-relaxed">
-                  <span className="text-[#D4AF37] font-medium">No-show?</span> You keep the full ₹2,000 — money never left your account.
+                  <span className="text-[#D4AF37] font-medium">No-show?</span> You keep the full ₹2,000. The money never left your account.
                 </p>
               </div>
             </motion.div>
@@ -640,9 +640,9 @@ export default function PromotersVenues() {
   }, [])
 
   return (
-    <div className="bg-black min-h-screen">
+    <div className="ep-page">
       {/* ── Hero ─────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-40 pb-24 px-6 md:px-16 lg:px-24 max-w-7xl mx-auto w-full">
+      <section className="ep-hero ep-hero--venues">
         {/* Ambient glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
@@ -652,12 +652,12 @@ export default function PromotersVenues() {
           }}
         />
 
-        <div ref={heroRef} className="relative z-10 flex flex-col items-center text-center gap-6">
+        <div ref={heroRef} className="ep-hero-copy">
           {/* Back link */}
           <Link
             data-hero
             to="/"
-            className="flex items-center gap-2 text-white/40 text-sm font-body hover:text-white/70 transition-colors self-start mb-2"
+            className="hidden"
             style={{ opacity: 0 }}
           >
             <ArrowLeft size={14} />
@@ -667,36 +667,35 @@ export default function PromotersVenues() {
           {/* Badge */}
           <div
             data-hero
-            className="liquid-glass border-gold-shimmer rounded-full px-3.5 py-1 flex items-center bg-gold-gradient/10 border border-[#D4AF37]/30"
+            className="ep-kicker"
             style={{ opacity: 0 }}
           >
-            <span className="text-[#D4AF37] text-xs font-medium font-body uppercase tracking-widest">
-              For Venues & Promoters
-            </span>
+            <span>For Venues &amp; Promoters</span>
           </div>
 
           {/* Heading */}
           <h1
             data-hero
-            className="text-5xl md:text-7xl lg:text-[5.5rem] font-heading italic text-gold-gradient leading-[0.88] max-w-4xl tracking-[-3px]"
+            className="ep-hero-title"
             style={{ opacity: 0 }}
           >
-            <BlurText text="List free. Get paid first. Win the city." delay={70} />
+            List your<br />events for free.
           </h1>
 
           {/* Subtext */}
           <p
             data-hero
-            className="text-white/55 font-body font-light text-base md:text-lg max-w-xl leading-relaxed"
+            className="ep-hero-body"
             style={{ opacity: 0 }}
           >
-            Zero fees to list. No-shows don't cost you a rupee. And the venues who join first become the names everyone books by default.
+            Zero fees to list. No-shows do not cost you a rupee. The venues who join first
+            become the names everyone books by default.
           </p>
 
           {/* Video frame */}
           <div
             data-hero
-            className="relative w-full max-w-4xl mt-8 rounded-3xl overflow-hidden liquid-glass-strong border-gold-shimmer"
+            className="hidden"
             style={{ opacity: 0, aspectRatio: '16 / 9' }}
           >
             <div ref={videoFrameRef} className="absolute inset-0 w-full h-full">
@@ -728,7 +727,7 @@ export default function PromotersVenues() {
           {/* Scroll cue */}
           <div
             data-hero
-            className="flex flex-col items-center gap-2 mt-8"
+            className="hidden"
             style={{ opacity: 0 }}
           >
             <span className="text-white/30 text-xs font-body uppercase tracking-widest">
@@ -746,7 +745,7 @@ export default function PromotersVenues() {
           label="Pricing"
           title="Free To List."
           body={[
-            'No subscription, no listing fee, no commission. We charge the guest a 3% platform fee — you keep 100% of your listed price, straight to your bank account.',
+            'No subscription, no listing fee, no commission. We charge the guest a 3% platform fee. You keep 100% of your listed price, straight to your bank account.',
             'Paid placement for top-of-feed visibility will be available down the line for venues that want it, but listing itself will never cost you anything.',
           ]}
           illustration={<PriceFlowIllustration />}
@@ -758,7 +757,7 @@ export default function PromotersVenues() {
           label="Guaranteed Revenue"
           title="No-Shows Aren't Your Problem."
           body={[
-            "Cash at Doorstep guests pay a fee upfront just to secure their spot — they're showing up. Digital bookings (UPI and card) are paid in full before they arrive, settled straight to your account.",
+            "Cash at Doorstep guests pay a fee upfront just to secure their spot, so they're showing up. Digital bookings (UPI and card) are paid in full before they arrive, settled straight to your account.",
             "If they don't show, you keep the money. Either way, you're covered.",
           ]}
           illustration={<NoShowIllustration />}
@@ -771,7 +770,7 @@ export default function PromotersVenues() {
           label="First-Mover Advantage"
           title="The Early Ones Win."
           body={[
-            'The first wave of Entrava users will book from whatever is listed. The venues that join now get that visibility by default — the ones that don\'t simply won\'t exist on the platform where people are looking.',
+            'The first wave of Entrava users will book from whatever is listed. The venues that join now get that visibility by default. The ones that don\'t simply won\'t exist on the platform where people are looking.',
             'Early partners build a reputation before it\'s competitive. A venue that consistently sells out on Entrava becomes the one everyone tries to book first.',
           ]}
           illustration={<FeedSimulation />}
@@ -804,7 +803,7 @@ export default function PromotersVenues() {
               <BlurText text="Get listed before everyone else does." delay={70} />
             </h2>
             <p className="relative z-10 text-white/55 font-body font-light text-sm md:text-base max-w-md">
-              No fees. Ninety seconds to set up. We handle discovery, payments, and the door — you run the night.
+              No fees. Ninety seconds to set up. We handle discovery, payments, and the door. You run the night.
             </p>
             <div className="relative z-10 flex items-center gap-4 mt-2 flex-wrap justify-center">
               <RippleButton

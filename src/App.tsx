@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import CustomCursor from './components/ui/CustomCursor'
@@ -10,7 +11,14 @@ import Features from './pages/Features'
 export default function App() {
   /* The landing page ships its own nav, matching the design comps. Rendering
      the shared Navbar on top of it would give "/" two navigations. */
-  const isLanding = useLocation().pathname === '/'
+  const location = useLocation()
+  const isLanding = location.pathname === '/'
+
+  useEffect(() => {
+    if (location.pathname === '/why' || location.pathname === '/promoters-venues') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    }
+  }, [location.pathname])
 
   return (
     <div className="bg-black min-h-screen">

@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Anton';
+  src: url('/fonts/Anton-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 /* ============================================================================
    ENTRAVA — landing page
    ----------------------------------------------------------------------------
@@ -754,9 +762,9 @@
 .lp-sec-finale .lp-ghost {
   top: 49%;
   width: 100vw;
-  font-family: 'Barlow', Impact, sans-serif;
+  font-family: 'Anton', Impact, sans-serif;
   font-size: clamp(110px, 15.8vw, 280px);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 0.76;
   letter-spacing: -0.055em;
   color: #e9e8e3;
