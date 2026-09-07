@@ -193,8 +193,7 @@ export default function Landing() {
     (p: number) => {
       const { pose, scr } = sample(p)
       const { vw, vh, fit, mobile } = view.current
-      const { ps, range } = track.current
-      const finaleLift = ps.length >= 4 ? Math.min(0, (p - ps[3]) * range) : 0
+      const { ps } = track.current
 
       if (sceneRef.current) {
         sceneRef.current.style.transform =
@@ -226,10 +225,9 @@ export default function Landing() {
       for (let i = 0; i < ghostRefs.current.length; i++) {
         const g = ghostRefs.current[i]
         if (!g) continue
-        const d = clamp((p - ps[i]) * 3.2, -1.4, 1.4)
-        const lift = i === 3 ? finaleLift : 0
+        const d = i === 3 && p >= ps[3] ? 0 : clamp((p - ps[i]) * 3.2, -1.4, 1.4)
         g.style.transform =
-          `translate(-50%, calc(-50% + ${(-d * 60 + lift).toFixed(2)}px))`
+          `translate(-50%, calc(-50% + ${(-d * 60).toFixed(2)}px))`
       }
 
       /* The final 25 frames have their own choreography: the title arrives
@@ -241,7 +239,7 @@ export default function Landing() {
         const cardsIn = smoothstep(0.84, 0.985, finale)
         rootRef.current.style.setProperty('--final-word-in', String(wordIn))
         rootRef.current.style.setProperty('--final-cards-in', String(cardsIn))
-        rootRef.current.style.setProperty('--final-stage-lift', `${finaleLift.toFixed(2)}px`)
+        rootRef.current.style.setProperty('--final-stage-lift', '0px')
         rootRef.current.style.setProperty('--final-card-inset', `${((1 - cardsIn) * 78).toFixed(2)}px`)
         rootRef.current.style.setProperty('--final-card-inset-neg', `${((cardsIn - 1) * 78).toFixed(2)}px`)
         rootRef.current.style.setProperty('--final-teaser-offset', `${((1 - cardsIn) * 36).toFixed(2)}px`)
@@ -659,7 +657,11 @@ export default function Landing() {
             <i /><i /><i />
           </div>
         </section>
+
+        <div className="lp-finale-hold" aria-hidden="true" />
       </div>
+
+      <div className="lp-finale-release" aria-hidden="true" />
 
       {/* ================= FOOTER ================= */}
       <footer className="lp-footer" id="lp-contact">
