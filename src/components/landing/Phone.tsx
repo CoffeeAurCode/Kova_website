@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 import {
   ChevronLeft,
   Menu,
@@ -202,7 +202,7 @@ function ScreenPay() {
         <p className="lp-disclaimer">
           Valid government-issued photo ID (Aadhaar, Passport, or Driving Licence) will be
           checked at the venue entrance. If you are below the legal age limit, the venue
-          reserves the right to refuse entry — including for pre-paid bookings. Platform fees
+          reserves the right to refuse entry, including for pre-paid bookings. Platform fees
           are non-refundable in such cases.
         </p>
 
@@ -214,43 +214,9 @@ function ScreenPay() {
 
 /* ---- screen 3 — entry ---------------------------------------------------- */
 
-/* A QR-shaped mark: three finder patterns, timing rows and a deterministic
-   payload field. It is decorative — deliberately not a scannable code, because
-   a scannable code on a marketing page is a link nobody vetted. */
-function useQrMatrix(size = 29) {
-  return useMemo(() => {
-    const m: boolean[][] = Array.from({ length: size }, () => Array(size).fill(false))
-    let s = 20260904
-    const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296)
-
-    for (let y = 0; y < size; y++)
-      for (let x = 0; x < size; x++) m[y][x] = rnd() > 0.52
-
-    const finder = (ox: number, oy: number) => {
-      for (let y = -1; y < 8; y++)
-        for (let x = -1; x < 8; x++) {
-          const gy = oy + y
-          const gx = ox + x
-          if (gy < 0 || gx < 0 || gy >= size || gx >= size) continue
-          const ring = x >= 0 && x < 7 && y >= 0 && y < 7 && (x === 0 || x === 6 || y === 0 || y === 6)
-          const core = x >= 2 && x <= 4 && y >= 2 && y <= 4
-          m[gy][gx] = ring || core
-        }
-    }
-    finder(0, 0)
-    finder(size - 7, 0)
-    finder(0, size - 7)
-
-    for (let i = 8; i < size - 8; i++) {
-      m[6][i] = i % 2 === 0
-      m[i][6] = i % 2 === 0
-    }
-    return m
-  }, [size])
-}
-
+/* The supplied production QR is inverted visually to match the light-on-black
+   treatment in the approved finale reference. */
 function ScreenEntry() {
-  const m = useQrMatrix(29)
   return (
     <>
       <StatusBar time="9:31" />
@@ -259,13 +225,7 @@ function ScreenEntry() {
 
         <div className="lp-qr-frame">
           <span /><span /><span /><span />
-          <svg viewBox={`0 0 ${m.length} ${m.length}`} shapeRendering="crispEdges" aria-hidden="true">
-            {m.map((row, y) =>
-              row.map((on, x) =>
-                on ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#ffffff" /> : null
-              )
-            )}
-          </svg>
+          <img src="/entrava-download-qr.jpeg" alt="Scan to download Entrava" />
         </div>
 
         <p className="lp-entry-h">SKIP THE CROWD OUTSIDE</p>
