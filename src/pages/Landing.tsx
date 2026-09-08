@@ -76,6 +76,7 @@ export default function Landing() {
 
   const rootRef = useRef<HTMLDivElement>(null)
   const journeyRef = useRef<HTMLDivElement>(null)
+  const footerRef = useRef<HTMLElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const phoneRef = useRef<HTMLDivElement>(null)
   const glowRef = useRef<HTMLDivElement>(null)
@@ -204,11 +205,13 @@ export default function Landing() {
         phoneRef.current.style.transform =
           `rotateZ(${pose.rz}deg) rotateX(${pose.rx}deg) rotateY(${pose.ry}deg)`
       }
-      /* Mobile finale: a phone and two stacked cards cannot share a viewport,
-         so the cards get one of their own and the phone bows out. */
-      let op = 1
-      if (mobile && p > ps[3]) op = 1 - clamp((p - ps[3] - 0.02) / 0.1, 0, 1)
-      if (sceneRef.current) sceneRef.current.style.opacity = String(op)
+      /* Mobile gives the stacked cards their own reading space. Desktop keeps
+         the completed phone visible until the sticky journey releases. */
+      let sceneOpacity = 1
+      if (mobile && p > ps[3]) {
+        sceneOpacity = 1 - clamp((p - ps[3] - 0.02) / 0.1, 0, 1)
+      }
+      if (sceneRef.current) sceneRef.current.style.opacity = String(sceneOpacity)
 
       /* The glow travels with the phone but lives outside the 3D scene, so it
          is driven separately — and it dims rather than flattens as the phone
@@ -218,7 +221,7 @@ export default function Landing() {
         glowRef.current.style.transform =
           `translate3d(${(pose.x * vw) / 100}px, ${(pose.y * vh) / 100}px, 0)` +
           ` scale(${(0.9 + 0.14 * face) * fit})`
-        glowRef.current.style.opacity = String((0.42 + 0.58 * face) * op)
+        glowRef.current.style.opacity = String((0.42 + 0.58 * face) * sceneOpacity)
       }
 
       /* Ghost words drift against the scroll — cheap depth, one transform. */
@@ -291,6 +294,10 @@ export default function Landing() {
     pTarget.current = clamp((window.scrollY - jTop) / range, 0, 1)
     setScrolled(window.scrollY > 40)
 
+    /* The handset is intentionally absent on mobile, so do not spend frames
+       calculating or painting an invisible 3D scroll sequence. */
+    if (view.current.mobile) return
+
     if (reduced.current) {
       pRender.current = pTarget.current
       paint(pTarget.current)
@@ -353,6 +360,20 @@ export default function Landing() {
     )
     els.forEach((el) => io.observe(el))
     return () => io.disconnect()
+  }, [])
+
+  /* Hide the released phone before the footer can visually cut through it. */
+  useEffect(() => {
+    const footer = footerRef.current
+    const root = rootRef.current
+    if (!footer || !root) return
+
+    const observer = new IntersectionObserver(([entry]) => {
+      root.toggleAttribute('data-footer-visible', entry.isIntersecting)
+    })
+
+    observer.observe(footer)
+    return () => observer.disconnect()
   }, [])
 
   /* --- lock the page behind the mobile drawer --------------------------- */
@@ -607,64 +628,63 @@ export default function Landing() {
             sectionRefs.current[3] = el
           }}
         >
-          <span
-            className="lp-ghost"
-            aria-hidden="true"
-            ref={(el) => {
-              ghostRefs.current[3] = el
-            }}
-          >
-            Use Entrava
-          </span>
+          <div className="lp-finale-stage">
+            <span
+              className="lp-ghost"
+              aria-hidden="true"
+              ref={(el) => {
+                ghostRefs.current[3] = el
+              }}
+            >
+              Use Entrava
+            </span>
 
-          <div className="lp-sec-inner">
-            <div className="lp-gates">
-              <article className="lp-gate">
-                <div className="lp-gate-head">
-                  <span className="lp-gate-icon"><CalendarIcon /></span>
-                  <div>
-                    <p className="lp-gate-tag">For venues and promoters</p>
-                    <h3 className="lp-gate-title">I&rsquo;m Hosting</h3>
+            <div className="lp-sec-inner">
+              <div className="lp-gates">
+                <article className="lp-gate">
+                  <div className="lp-gate-head">
+                    <span className="lp-gate-icon"><CalendarIcon /></span>
+                    <div>
+                      <p className="lp-gate-tag">For venues and promoters</p>
+                      <h3 className="lp-gate-title">I&rsquo;m Hosting</h3>
+                    </div>
                   </div>
-                </div>
-                <p className="lp-gate-body">List your events on Entrava today</p>
-                <button className="lp-gate-link" onClick={() => go('/promoters-venues')}>
-                  Learn more
-                  <i><ArrowRight /></i>
-                </button>
-              </article>
+                  <p className="lp-gate-body">List your events on Entrava today</p>
+                  <button className="lp-gate-link" onClick={() => go('/promoters-venues')}>
+                    Learn more
+                    <i><ArrowRight /></i>
+                  </button>
+                </article>
 
-              <div className="lp-gate-gap" />
+                <div className="lp-gate-gap" />
 
-              <article className="lp-gate">
-                <div className="lp-gate-head">
-                  <span className="lp-gate-icon"><UserIcon /></span>
-                  <div>
-                    <p className="lp-gate-tag">For guests</p>
-                    <h3 className="lp-gate-title">I&rsquo;m a Guest</h3>
+                <article className="lp-gate">
+                  <div className="lp-gate-head">
+                    <span className="lp-gate-icon"><UserIcon /></span>
+                    <div>
+                      <p className="lp-gate-tag">For guests</p>
+                      <h3 className="lp-gate-title">I&rsquo;m a Guest</h3>
+                    </div>
                   </div>
-                </div>
-                <p className="lp-gate-body">Discover. Pre-Book. Enter, Seamlessly.</p>
-                <button className="lp-gate-link" onClick={() => go('/why')}>
-                  Why Entrava
-                  <i><ArrowRight /></i>
-                </button>
-              </article>
+                  <p className="lp-gate-body">Discover. Pre-Book. Enter, Seamlessly.</p>
+                  <button className="lp-gate-link" onClick={() => go('/why')}>
+                    Why Entrava
+                    <i><ArrowRight /></i>
+                  </button>
+                </article>
+              </div>
             </div>
-          </div>
 
-          <div className="lp-finale-teasers" aria-hidden="true">
-            <i /><i /><i />
+            <div className="lp-finale-teasers" aria-hidden="true">
+              <i /><i /><i />
+            </div>
           </div>
         </section>
 
-        <div className="lp-finale-hold" aria-hidden="true" />
       </div>
 
-      <div className="lp-finale-release" aria-hidden="true" />
-
       {/* ================= FOOTER ================= */}
-      <footer className="lp-footer" id="lp-contact">
+      <footer className="lp-footer" id="lp-contact" ref={footerRef}>
         <div className="lp-footer-inner">
           <div>
             <p className="lp-footer-mark">ENTRAVA</p>
