@@ -45,7 +45,12 @@ export default function CtaFooter() {
     return () => ctx.revert()
   }, [])
 
-  const footerLinks = ['Privacy', 'Terms', 'Contact']
+  const footerLinks = [
+    { label: 'Privacy', href: '/privacy' },
+    { label: 'Terms', href: '/terms' },
+    { label: 'Refunds', href: '/refund-policy' },
+    { label: 'Contact', href: '/#lp-contact' },
+  ]
 
   return (
     <section className="relative overflow-hidden">
@@ -118,12 +123,12 @@ export default function CtaFooter() {
           <div className="flex items-center gap-6">
             {footerLinks.map((link, i) => (
               <a
-                key={link}
-                href="#"
+                key={link.label}
+                href={link.href}
                 ref={(el) => { if (el) footerLinksRef.current[i] = el }}
                 className="relative text-white/40 text-xs font-body hover:text-white/60 transition-colors"
               >
-                {link}
+                {link.label}
                 <span
                   className="link-underline absolute bottom-0 left-0 right-0 h-px bg-white/40 origin-left"
                   style={{ transform: 'scaleX(0)' }}

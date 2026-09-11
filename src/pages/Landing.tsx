@@ -721,6 +721,13 @@ export default function Landing() {
                 entrava.app
               </a>
             </div>
+            <div className="lp-footer-col">
+              <h4>Legal</h4>
+              <button onClick={() => go('/privacy')}>Privacy</button>
+              <button onClick={() => go('/terms')}>Terms</button>
+              <button onClick={() => go('/refund-policy')}>Refunds</button>
+              <button onClick={() => go('/service-delivery')}>Service delivery</button>
+            </div>
           </div>
         </div>
 

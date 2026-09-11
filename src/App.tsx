@@ -7,6 +7,7 @@ import Landing from './pages/Landing'
 import WhyEntrava from './pages/WhyEntrava'
 import PromotersVenues from './pages/PromotersVenues'
 import Features from './pages/Features'
+import LegalPage from './pages/LegalPage'
 
 export default function App() {
   /* The landing page ships its own nav, matching the design comps. Rendering
@@ -15,7 +16,7 @@ export default function App() {
   const isLanding = location.pathname === '/'
 
   useEffect(() => {
-    if (location.pathname === '/why' || location.pathname === '/promoters-venues') {
+    if (location.pathname !== '/') {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     }
   }, [location.pathname])
@@ -30,6 +31,10 @@ export default function App() {
         <Route path="/why" element={<WhyEntrava />} />
         <Route path="/promoters-venues" element={<PromotersVenues />} />
         <Route path="/features" element={<Features />} />
+        <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+        <Route path="/terms" element={<LegalPage kind="terms" />} />
+        <Route path="/refund-policy" element={<LegalPage kind="refund" />} />
+        <Route path="/service-delivery" element={<LegalPage kind="service" />} />
       </Routes>
     </div>
   )
