@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import Phone from '../components/landing/Phone'
 import { ArrowRight, CalendarIcon, ChevronLeft, Close, Menu, UserIcon } from '../components/landing/icons'
 import '../styles/landing.css'
+import { APP_STORE_URL, PLAY_STORE_URL, primaryDownloadUrl } from '../lib/storeLinks'
 
-const APP_STORE_URL = 'https://apps.apple.com/in/app/entrava-nightlife/id6789246261'
 
 /* ============================================================================
    THE MOTION MODEL
@@ -431,7 +431,7 @@ export default function Landing() {
 
         <a
           className="lp-cta lp-cta--nav"
-          href={APP_STORE_URL}
+          href={primaryDownloadUrl()}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -459,7 +459,7 @@ export default function Landing() {
         <a
           className="lp-cta"
           style={{ marginTop: 32, alignSelf: 'flex-start' }}
-          href={APP_STORE_URL}
+          href={primaryDownloadUrl()}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -510,15 +510,27 @@ export default function Landing() {
                 <br />
                 book in advance, and enter hassle-free.
               </p>
-              <a
-                className="lp-cta lp-rv lp-rv-3"
-                href={APP_STORE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Download Entrava
-                <ArrowRight />
-              </a>
+              <div className="lp-cta-row lp-rv lp-rv-3">
+                <a
+                  className="lp-cta"
+                  href={primaryDownloadUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download Entrava
+                  <ArrowRight />
+                </a>
+                {PLAY_STORE_URL && (
+                  <a
+                    className="lp-cta lp-cta--outline"
+                    href={PLAY_STORE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Get it on Google Play
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 
@@ -712,7 +724,13 @@ export default function Landing() {
               <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
                 App Store
               </a>
-              <a href="mailto:entrava.app@gmail.com">Android, notify me</a>
+              {PLAY_STORE_URL ? (
+                <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer">
+                  Google Play
+                </a>
+              ) : (
+                <a href="mailto:entrava.app@gmail.com">Android, notify me</a>
+              )}
             </div>
             <div className="lp-footer-col">
               <h4>Contact</h4>

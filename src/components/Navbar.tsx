@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ArrowRight, Menu, X } from 'lucide-react'
 import '../styles/editorial-pages.css'
+import { primaryDownloadUrl } from '../lib/storeLinks'
 
-const APP_STORE_URL = 'https://apps.apple.com/in/app/entrava-nightlife/id6789246261'
 
 const navLinks = [
   { label: 'How it works', to: '/#lp-prebook' },
@@ -34,7 +34,7 @@ export default function Navbar() {
         ))}
       </nav>
 
-      <a className="ep-download" href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+      <a className="ep-download" href={primaryDownloadUrl()} target="_blank" rel="noopener noreferrer">
         Download Entrava
         <ArrowRight aria-hidden="true" />
       </a>
@@ -53,7 +53,7 @@ export default function Navbar() {
         {navLinks.map(({ label, to }) => (
           <Link key={label} to={to} onClick={() => setOpen(false)}>{label}</Link>
         ))}
-        <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+        <a href={primaryDownloadUrl()} target="_blank" rel="noopener noreferrer">
           Download Entrava
           <ArrowRight aria-hidden="true" />
         </a>
