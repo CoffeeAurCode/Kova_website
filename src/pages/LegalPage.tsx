@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import '../styles/editorial-pages.css'
 
-type LegalKind = 'privacy' | 'terms' | 'refund' | 'service'
+type LegalKind = 'privacy' | 'terms' | 'refund' | 'service' | 'delete'
 
 const privacySections = [
   ['1. Data we collect', 'We collect your name, phone number, date of birth, gender and city to provide ticketing services. We only collect what is necessary to perform our service. Your phone number is used to sign you in via a one-time password.'],
@@ -14,7 +14,7 @@ const privacySections = [
   ['8. Children', 'Entrava is strictly for users aged 18 and over. We do not knowingly collect data from anyone under 18.'],
 ]
 
-const pages: Record<LegalKind, { eyebrow: string; title: string; intro: string; sections: string[][] }> = {
+const pages: Record<LegalKind, { eyebrow: string; title: string; intro: string; sections: string[][]; updated?: string }> = {
   privacy: {
     eyebrow: 'Your information',
     title: 'Privacy Policy',
@@ -46,6 +46,23 @@ const pages: Record<LegalKind, { eyebrow: string; title: string; intro: string; 
       ['Refund timing', 'Approved refunds are returned through Razorpay to the original payment method. The final credit time depends on the issuing bank or card network.'],
     ],
   },
+  // The public account-deletion page Google Play requires (a web URL where a
+  // user can request deletion without the app), and the one the privacy
+  // policy already pointed at. It must match what delete-account really does.
+  delete: {
+    eyebrow: 'Account deletion',
+    title: 'Delete your Entrava account',
+    intro: 'How to delete your Entrava account, and exactly what happens to your data when you do.',
+    updated: '26 September 2026',
+    sections: [
+      ['Delete it in the app', 'Open Entrava, go to Profile, tap Delete Account, type DELETE to confirm and tap the button. Your account is deleted straight away and you are signed out on that phone.'],
+      ['Request deletion without the app', 'If you no longer have the app, email entrava.app@gmail.com with the subject "Delete my account" and the phone number you signed up with. To protect you, we confirm the request with a one-time code sent on WhatsApp to that number before deleting anything. We complete verified requests within 30 days and email you when it is done.'],
+      ['What is deleted', 'Your name, email address, phone number, date of birth, gender, city, profile photo, username, bio and link; your friends and friend requests; groups you created and your place in other groups; saved events; blocks; notification settings and device notification tokens; and your login. Anyone you split a table with will see you as a deleted account.'],
+      ['What we keep, and why', 'Booking and payment records are kept in anonymised form, with your personal details removed, because they are financial records of payments already made and Indian tax and accounting law requires us to keep them. Venues keep the guest-list entries for bookings that have already happened.'],
+      ['Venue accounts', 'If you own a venue on Entrava, deleting your account also removes the venue from the app, stops new bookings for its events and erases its contact and bank details. Tickets already sold for upcoming events stay valid at the door.'],
+      ['Taking a break instead', 'If you only want to disappear for a while, use Profile > Privacy > Deactivate account instead. Friends cannot find you or see your plans while you are deactivated, nothing is deleted, and logging back in reactivates your account.'],
+    ],
+  },
   service: {
     eyebrow: 'What we deliver',
     title: 'Service Delivery Policy',
@@ -67,7 +84,7 @@ export default function LegalPage({ kind }: { kind: LegalKind }) {
         <p className="legal-eyebrow">{page.eyebrow}</p>
         <h1>{page.title}</h1>
         <p className="legal-intro">{page.intro}</p>
-        <p className="legal-updated">Last updated 11 September 2026</p>
+        <p className="legal-updated">Last updated {page.updated ?? '11 September 2026'}</p>
       </header>
 
       <div className="legal-layout">
@@ -76,6 +93,7 @@ export default function LegalPage({ kind }: { kind: LegalKind }) {
           <Link to="/terms">Terms</Link>
           <Link to="/refund-policy">Refunds</Link>
           <Link to="/service-delivery">Service delivery</Link>
+          <Link to="/delete-account">Delete account</Link>
         </aside>
 
         <article className="legal-copy">

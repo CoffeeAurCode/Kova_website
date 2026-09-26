@@ -35,6 +35,7 @@ export default function App() {
         <Route path="/terms" element={<LegalPage kind="terms" />} />
         <Route path="/refund-policy" element={<LegalPage kind="refund" />} />
         <Route path="/service-delivery" element={<LegalPage kind="service" />} />
+        <Route path="/delete-account" element={<LegalPage kind="delete" />} />
       </Routes>
     </div>
   )
