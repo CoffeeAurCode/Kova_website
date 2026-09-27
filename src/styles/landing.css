@@ -185,6 +185,21 @@
 .lp-cta--nav {
   padding: 13px 26px;
 }
+/* hero: primary + (once Android is live) the Google Play button beside it */
+.lp-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.lp-cta--outline {
+  background: transparent;
+  color: #e3d4b6;
+  border: 1px solid rgba(201, 179, 138, 0.45);
+  box-shadow: none;
+}
+.lp-cta--outline:hover {
+  box-shadow: 0 10px 34px rgba(201, 179, 138, 0.16);
+}
 .lp-cta-short {
   display: none;
 }

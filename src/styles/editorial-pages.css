@@ -106,6 +106,20 @@
   color: var(--ep-paper);
 }
 
+.legal-page { padding: 150px clamp(24px, 7vw, 100px) 96px; }
+.legal-hero { max-width: 880px; padding-bottom: 56px; border-bottom: 1px solid rgba(201, 179, 138, 0.22); }
+.legal-eyebrow, .legal-updated { color: var(--ep-gold); font: 600 10px/1.5 'Montserrat', sans-serif; letter-spacing: 0.2em; text-transform: uppercase; }
+.legal-hero h1 { max-width: 760px; margin: 20px 0; color: var(--ep-gold-light); font: 400 clamp(48px, 7vw, 88px)/0.98 'Playfair Display', Georgia, serif; letter-spacing: -0.03em; }
+.legal-intro { max-width: 660px; margin: 0 0 24px; color: rgba(241, 238, 232, 0.72); font: 300 clamp(15px, 1.4vw, 18px)/1.7 'Montserrat', sans-serif; }
+.legal-layout { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 760px); gap: clamp(48px, 8vw, 120px); padding-top: 64px; }
+.legal-index { position: sticky; top: 112px; align-self: start; display: grid; gap: 16px; }
+.legal-index a { min-height: 44px; display: flex; align-items: center; color: rgba(241, 238, 232, 0.58); font: 500 11px/1.4 'Montserrat', sans-serif; letter-spacing: 0.08em; text-decoration: none; text-transform: uppercase; transition: color 180ms ease, transform 180ms ease; }
+.legal-index a:hover { color: var(--ep-gold-light); transform: translateX(3px); }
+.legal-copy section { padding: 0 0 34px; margin: 0 0 34px; border-bottom: 1px solid rgba(241, 238, 232, 0.1); }
+.legal-copy h2 { margin: 0 0 14px; color: var(--ep-gold-light); font: 500 clamp(19px, 2vw, 25px)/1.25 'Playfair Display', Georgia, serif; }
+.legal-copy p { max-width: 68ch; margin: 0; color: rgba(241, 238, 232, 0.72); font: 300 15px/1.8 'Montserrat', sans-serif; white-space: pre-line; }
+.legal-copy a { color: var(--ep-gold-light); text-underline-offset: 4px; }
+
 .ep-hero {
   position: relative;
   min-height: 100dvh;
@@ -229,6 +243,10 @@
   .ep-hero-title { max-width: 520px; font-size: clamp(46px, 12vw, 68px); }
   .ep-hero-body { max-width: 520px; margin-top: 22px; font-size: 15px; }
   .ep-hero-note { font-size: 11px; line-height: 1.5; }
+  .legal-page { padding: 118px 24px 72px; }
+  .legal-hero { padding-bottom: 40px; }
+  .legal-layout { grid-template-columns: 1fr; gap: 42px; padding-top: 44px; }
+  .legal-index { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
